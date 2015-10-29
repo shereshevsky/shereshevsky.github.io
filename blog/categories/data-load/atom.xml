@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Data Load | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/data-load/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-10-29T18:20:11+02:00</updated>
+  <updated>2015-10-29T18:21:14+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -20,11 +20,15 @@
     <id>http://dbcaptain.com/blog/2015/10/29/Load OSM data to PostgreSQL</id>
     <content type="html"><![CDATA[<p>I&rsquo;m using a small DigitalOcean droplet to load fresh OSM data to PostgreSQL.
 The 2G memory instance is prefereable, change it just for OSM load and you can change it back after.
-I&rsquo;m going to use current stable versions:
-* PostgreSQL 9.3
-* PostGIS 2.1
-* osm2pgsql 0.84
-* Ubuntu 12.04.4 LTS</p>
+I&rsquo;m going to use current stable versions:</p>
+
+<ul>
+<li>PostgreSQL 9.3</li>
+<li>PostGIS 2.1</li>
+<li>osm2pgsql 0.84</li>
+<li>Ubuntu 12.04.4 LTS</li>
+</ul>
+
 
 <p>As reference using osm2pgsql article in OSM wiki.
 Reference for Postgres/PostGIS installation using PostgreSQL installation guides wiki article and Official Ubuntu Community Wiki.
