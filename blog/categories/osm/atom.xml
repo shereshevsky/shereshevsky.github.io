@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Osm | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/osm/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-10-29T18:12:08+02:00</updated>
+  <updated>2015-10-29T18:17:58+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[load-OSM-data-to-PostgreSQL]]></title>
-    <link href="http://dbcaptain.com/blog/2015/10/29/load-OSM-data-to-PostgreSQL/"/>
+    <link href="http://dbcaptain.com/blog/2015/10/29/Load%20OSM%20data%20to%20PostgreSQL/"/>
     <updated>2015-10-29T16:43:15+02:00</updated>
-    <id>http://dbcaptain.com/blog/2015/10/29/load-OSM-data-to-PostgreSQL</id>
+    <id>http://dbcaptain.com/blog/2015/10/29/Load OSM data to PostgreSQL</id>
     <content type="html"><![CDATA[<p>I&rsquo;m using a small DigitalOcean droplet to load fresh OSM data to PostgreSQL.
 The 2G memory instance is prefereable, change it just for OSM load and you can change it back after.
 I&rsquo;m going to use current stable versions:
