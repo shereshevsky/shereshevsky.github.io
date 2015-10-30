@@ -100,10 +100,11 @@ backup config: mkdir ~/pg_config_backup sudo cp /etc/postgresql/9.3/main/* ~/pg_
  sudo apt-get install postgresql-server-dev-9.3
 </code></li>
 <li>check correct repository setup:
- ```
- echo &ldquo;deb <a href="http://apt.postgresql.org/pub/repos/apt/">http://apt.postgresql.org/pub/repos/apt/</a> wheezy-pgdg main&rdquo; >> /etc/apt/sources.list.d/pgdg.list
+ <code>
+ echo "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main" &gt;&gt; /etc/apt/sources.list.d/pgdg.list
  sudo apt-get install wget ca-certificates
- wget &ndash;quiet -O - <a href="https://www.postgresql.org/media/keys/ACCC4CF8.asc">https://www.postgresql.org/media/keys/ACCC4CF8.asc</a> | sudo apt-key add -
+ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+</code>
 
 <h2>Install 9.4 packages and create the new cluster:</h2></li>
 </ol>
