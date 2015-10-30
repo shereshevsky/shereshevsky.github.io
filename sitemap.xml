@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://dbcaptain.com/blog/2015/10/29/Upgrade%20PostgreSQL%209.3%20to%209.4%20on%20mater-slave%20replication%20cluster/</loc>
+    <lastmod>2015-10-29T16:43:15+02:00</lastmod>
+  </url>
+  <url>
     <loc>http://dbcaptain.com/blog/2015/10/29/Load%20OSM%20data%20to%20PostgreSQL/</loc>
     <lastmod>2015-10-29T16:43:15+02:00</lastmod>
   </url>
