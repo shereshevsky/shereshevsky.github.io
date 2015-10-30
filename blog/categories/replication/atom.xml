@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Replication | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/replication/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-10-30T17:37:09+02:00</updated>
+  <updated>2015-10-30T17:38:41+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -39,7 +39,7 @@
  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 </code>
 
-<h2>Install 9.4 packages and create the new cluster:</h2>
+<h3>Install 9.4 packages and create the new cluster:</h3>
 
 <pre><code class="">sudo apt-get update
 sudo apt-get install postgresql-9.4 postgresql-contrib-9.4 postgresql-client-9.4 postgresql-9.4-pgespresso postgresql-server-dev-9.4
@@ -60,7 +60,7 @@ or
 /usr/lib/postgresql/9.4/bin/pg_ctl -D /data/postgresql//9.4/main -l logfile start
 </code>
 
-<h2>Prepare and start 9.4 cluster</h2>
+<h3>Prepare and start 9.4 cluster</h3>
 
 <pre><code>cd /etc/postgresql
 cp -R 9.3/ 9.4
@@ -82,14 +82,14 @@ en_US.UTF-8 | en_US.UTF-8
 ^D
 </code>
 
-<h2>stop running clusters</h2>
+<h3>stop running clusters</h3>
 
 <pre><code>sudo pg_lsclusters
 sudo service postgresql stop
 sudo mv /etc/init.d/postgresql /etc/init.d/postgresql.
 </code></pre>
 
-<h2>run pg_upgrade</h2>
+<h3>run pg_upgrade</h3>
 
 <pre><code>cd /tmp
 </code></pre>
@@ -125,7 +125,7 @@ sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade \
 --jobs=4
 </code>
 
-<h2>change 9.4 port to 5432</h2>
+<h3>change 9.4 port to 5432</h3>
 
 <pre><code>sudo vi /etc/postgresql/9.4/main/postgresql.conf  -- 5432
 sudo vi /etc/postgresql/9.3/main/postgresql.conf  -- 5433
@@ -139,13 +139,13 @@ sudo vi /etc/postgresql/9.3/main/postgresql.conf  -- 5433
 sudo service postgresql start 9.4
 </code></pre>
 
-<h2>Remove the old packages</h2>
+<h3>Remove the old packages</h3>
 
 <pre><code>dpkg -l | grep postgresql
 apt-get remove postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3
 </code></pre>
 
-<h2>Analyze and drop old</h2>
+<h3>Analyze and drop old</h3>
 
 <pre><code>sudo su  postgres
 /tmp/analyze_new_cluster.sh
@@ -153,7 +153,7 @@ or /usr/lib/postgresql/9.4/bin/vacuumdb -dbluevine -Upostgres -h127.0.0.1
 /tmp/delete_old_cluster.sh
 </code></pre>
 
-<h2>On slave:</h2>
+<h3>On slave:</h3>
 
 <p>backup configs:
 <code>
@@ -169,7 +169,7 @@ mkdir  /data/postgresql/9.4/main
 sudo chown -R  postgres.postgres /data/postgresql
 </code></p>
 
-<h2>On master:</h2>
+<h3>On master:</h3>
 
 <pre><code>sudo -u postgres psql -x -c "select * from pg_stat_replication;"
 select x id, x::text into test from generate_series(1, 1000000) x;
