@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 9.4 | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/9-dot-4/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-10-30T17:33:49+02:00</updated>
+  <updated>2015-10-30T17:35:22+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -23,12 +23,12 @@
 <ol>
 <li>backup DB cluster</li>
 <li>backup config:
- <code>sh
+ <code>
  mkdir ~/pg_config_backup
  sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup
 </code></li>
 <li>add extra package if missing:
- <code>sh
+ <code>
  sudo apt-get update
  sudo apt-get install postgresql-server-dev-9.3
 </code></li>
@@ -40,7 +40,7 @@
 
 <h2>Install 9.4 packages and create the new cluster:</h2>
 
-<pre><code class="sh ">sudo apt-get update
+<pre><code class="">sudo apt-get update
 sudo apt-get install postgresql-9.4 postgresql-contrib-9.4 postgresql-client-9.4 postgresql-9.4-pgespresso postgresql-server-dev-9.4
 </code></pre>
 
