@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Postgresql | Data Tips and Tricks]]></title>
-  <link href="http://dbcaptain.com/blog/categories/postgresql/atom.xml" rel="self"/>
+  <title><![CDATA[Category: Replication | Data Tips and Tricks]]></title>
+  <link href="http://dbcaptain.com/blog/categories/replication/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
   <updated>2015-10-30T17:33:49+02:00</updated>
   <id>http://dbcaptain.com/</id>
@@ -182,107 +182,6 @@ check logs on all the servers</p>
 <a href="http://www.postgresql.org/docs/9.4/static/upgrading.html">http://www.postgresql.org/docs/9.4/static/upgrading.html</a>
 <a href="http://www.postgresql.org/docs/9.4/static/pgupgrade.html">http://www.postgresql.org/docs/9.4/static/pgupgrade.html</a>
 <a href="https://wiki.postgresql.org/wiki/Using_pg_upgrade_on_Ubuntu/Debian">https://wiki.postgresql.org/wiki/Using_pg_upgrade_on_Ubuntu/Debian</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Load OSM Data to PostgreSQL]]></title>
-    <link href="http://dbcaptain.com/blog/2015/10/29/Load%20OSM%20data%20to%20PostgreSQL/"/>
-    <updated>2015-10-29T16:43:15+02:00</updated>
-    <id>http://dbcaptain.com/blog/2015/10/29/Load OSM data to PostgreSQL</id>
-    <content type="html"><![CDATA[<p>I&rsquo;m using a small DigitalOcean droplet to load fresh OSM data to PostgreSQL.
-The 2G memory instance is prefereable, change it just for OSM load and you can change it back after.
-I&rsquo;m going to use current stable versions:</p>
-
-<ul>
-<li>PostgreSQL 9.3</li>
-<li>PostGIS 2.1</li>
-<li>osm2pgsql 0.84</li>
-<li>Ubuntu 12.04.4 LTS</li>
-</ul>
-
-
-<p>As reference using osm2pgsql article in OSM wiki.
-Reference for Postgres/PostGIS installation using PostgreSQL installation guides wiki article and Official Ubuntu Community Wiki.
-This one was good too.</p>
-
-<pre><code class="sh">$ echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" &gt; /etc/apt/sources.list.d/postgresql.list
-$ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-$ sudo apt-get update
-$ sudo apt-get upgrade
-$ sudo apt-get install postgresql-9.3 postgresql-9.3-postgis-2.1 postgresql-contrib-9.3
-</code></pre>
-
-<p>Edit pg_hba.config for postgres to connect locally.</p>
-
-<pre><code class="sh">$ sudo vi /etc/postgresql/9.3/main/pg_hba.conf
-</code></pre>
-
-<p>First not commented line will be like this (change peer to trust):
-local all postgres trust</p>
-
-<p>Restart postgresql service:
-<code>sh
-$ sudo service postgresql restart
-</code>
-Now check you are able to connect to postgres (default) database:</p>
-
-<pre><code class="sh">$ psql -U postgres
-psql (9.3.4)
-Type "help" for help.
-
-postgres=#
-</code></pre>
-
-<p>Create new database to store OSM data:</p>
-
-<pre><code class="sh">postgres=# create database osm;
-CREATE DATABASE
-</code></pre>
-
-<p>Connect to created database and add PostGIS and H-store extensions:
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>psql -U postgres -d osm
-</span><span class='line'>psql <span class="o">(</span>9.3.4<span class="o">)</span>
-</span><span class='line'>Type <span class="p">&amp;</span>ldquo<span class="p">;</span><span class="nb">help</span><span class="p">&amp;</span>rdquo<span class="p">;</span> <span class="k">for</span> help.&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;osm<span class="o">=</span><span class="c"># create extension postgis;</span>
-</span><span class='line'>CREATE EXTENSION
-</span><span class='line'><span class="nv">osm</span><span class="o">=</span><span class="c"># create extension hstore;</span>
-</span><span class='line'>CREATE EXTENSION
-</span></code></pre></td></tr></table></div></figure>
-Now we have the database we will use to load OSM data later.</p>
-
-<p>Now let&rsquo;s compile osm2pgsql:</p>
-
-<pre><code class="sh">$ sudo apt-get install build-essential libxml2-dev libgeos++-dev libpq-dev libbz2-dev proj libtool automake git lua5.2 liblua5.2-0 liblua5.2-dev liblua5.1-0 libprotobuf-c0-dev protobuf-c-compiler
-$ wget https://github.com/openstreetmap/osm2pgsql/archive/0.84.0.zip
-$ unzip 0.84.0.zip
-$ rm 0.84.0.zip
-$ cd osm2pgsql-0.84.0
-$ ./autogen.sh &amp;&amp; ./configure &amp;&amp; make
-$ sudo make install
-</code></pre>
-
-<p>Now let&rsquo;s download osm file we will use for import.
-Here you can find different mirrors.</p>
-
-<pre><code class="sh">wget http://download.geofabrik.de/north-america/us-northeast-latest.osm.bz2
-</code></pre>
-
-<p>And run osm2pgsql:</p>
-
-<pre><code class="sh">bunzip2 -c us-northeast-latest.osm.bz2 | /usr/local/bin/osm2pgsql --slim -E 4326 -d osm -C 1500 -S /usr/share/osm2pgsql/default.style -U postgres --hstore /dev/stdin
-</code></pre>
-
-<p>And waiting &hellip;</p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-10-30T17:29:56+02:00</updated>
+  <updated>2015-10-30T17:33:49+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -14,81 +14,123 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Load OSM Data to PostgreSQL]]></title>
-    <link href="http://dbcaptain.com/blog/2015/10/29/Upgrade%20PostgreSQL%209.3%20to%209.4%20on%20mater-slave%20replication%20cluster/"/>
-    <updated>2015-10-29T16:43:15+02:00</updated>
-    <id>http://dbcaptain.com/blog/2015/10/29/Upgrade PostgreSQL 9.3 to 9.4 on mater-slave replication cluster</id>
-    <content type="html"><![CDATA[<p>I&rsquo;m using a small DigitalOcean droplet to load fresh OSM data to PostgreSQL.
-The 2G memory instance is prefereable, change it just for OSM load and you can change it back after.
-I&rsquo;m going to use current stable versions:</p>
+    <title type="html"><![CDATA[Upgrade PostgreSQL 9.3 to 9.4 on Mater-slave Replication Cluster]]></title>
+    <link href="http://dbcaptain.com/blog/2015/10/30/Upgrade%20PostgreSQL%209.3%20to%209.4%20on%20mater-slave%20replication%20cluster/"/>
+    <updated>2015-10-30T16:43:15+02:00</updated>
+    <id>http://dbcaptain.com/blog/2015/10/30/Upgrade PostgreSQL 9.3 to 9.4 on mater-slave replication cluster</id>
+    <content type="html"><![CDATA[<h3>Preparations:</h3>
 
-<ul>
-<li>PostgreSQL 9.3</li>
-<li>PostGIS 2.1</li>
-<li>osm2pgsql 0.84</li>
-<li>Ubuntu 12.04.4 LTS</li>
-</ul>
+<ol>
+<li>backup DB cluster</li>
+<li>backup config:
+ <code>sh
+ mkdir ~/pg_config_backup
+ sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup
+</code></li>
+<li>add extra package if missing:
+ <code>sh
+ sudo apt-get update
+ sudo apt-get install postgresql-server-dev-9.3
+</code></li>
+<li>check correct repository setup:
+ ```
+ echo &ldquo;deb <a href="http://apt.postgresql.org/pub/repos/apt/">http://apt.postgresql.org/pub/repos/apt/</a> wheezy-pgdg main&rdquo; >> /etc/apt/sources.list.d/pgdg.list
+ sudo apt-get install wget ca-certificates
+ wget &ndash;quiet -O - <a href="https://www.postgresql.org/media/keys/ACCC4CF8.asc">https://www.postgresql.org/media/keys/ACCC4CF8.asc</a> | sudo apt-key add -
+
+<h2>Install 9.4 packages and create the new cluster:</h2></li>
+</ol>
 
 
-<p>As reference using osm2pgsql article in OSM wiki.
-Reference for Postgres/PostGIS installation using PostgreSQL installation guides wiki article and Official Ubuntu Community Wiki.
-This one was good too.</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install postgresql-9.4 postgresql-contrib-9.4 postgresql-client-9.4 postgresql-9.4-pgespresso postgresql-server-dev-9.4
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Drop 9.4 cluster if created by installer</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>pg_dropcluster 9.4 main
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Initialize the new PostgreSQL cluster with initdb:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main&quot;</span> &gt; /etc/apt/sources.list.d/postgresql.list
-</span><span class='line'><span class="nv">$ </span>wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc <span class="p">|</span> sudo apt-key add -
-</span><span class='line'><span class="nv">$ </span>sudo apt-get update
-</span><span class='line'><span class="nv">$ </span>sudo apt-get upgrade
-</span><span class='line'><span class="nv">$ </span>sudo apt-get install postgresql-9.3 postgresql-9.3-postgis-2.1 postgresql-contrib-9.3
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo chown -R  postgres.postgres /etc/postgresql
+</span><span class='line'>sudo chown -R  postgres.postgres /data/postgresql
+</span><span class='line'>sudo su postgres
+</span><span class='line'>/usr/lib/postgresql/9.4/bin/initdb -D /data/postgresql/9.4/main -E UTF8
+</span><span class='line'>/usr/lib/postgresql/9.4/bin/postgres -D /data/postgresql//9.4/main
+</span><span class='line'>or
+</span><span class='line'>/usr/lib/postgresql/9.4/bin/pg_ctl -D /data/postgresql//9.4/main -l logfile start
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Edit pg_hba.config for postgres to connect locally.</p>
+<h2>Prepare and start 9.4 cluster</h2>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo vi /etc/postgresql/9.3/main/pg_hba.conf
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">cd</span> /etc/postgresql
+</span><span class='line'>cp -R 9.3/ 9.4
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>First not commented line will be like this (change peer to trust):
-local all postgres trust</p>
-
-<p>Restart postgresql service:</p>
+<p>change config to 9.4</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo service postgresql restart
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sed -i <span class="s1">&#39;s/9.3/9.4/g&#39;</span> postgresql.conf
+</span><span class='line'>grep <span class="s1">&#39;9.&#39;</span> postgresql.conf
+</span><span class='line'>/usr/lib/postgresql/9.4/bin/pg_ctl -D /etc/postgresql/9.4/main -l postgres.log start
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Now check you are able to connect to postgres (default) database:</p>
+<p>check:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>psql -U postgres
-</span><span class='line'>psql <span class="o">(</span>9.3.4<span class="o">)</span>
-</span><span class='line'>Type <span class="s2">&quot;help&quot;</span> <span class="k">for</span> help.
-</span><span class='line'>
-</span><span class='line'><span class="nv">postgres</span><span class="o">=</span><span class="c">#</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">postgres</span><span class="o">=</span><span class="c"># select datcollate, datctype from pg_database where datname = &#39;template0&#39;;</span>
+</span><span class='line'> datcollate  <span class="p">|</span>  datctype
+</span><span class='line'>-------------+-------------
+</span><span class='line'> en_US.UTF-8 <span class="p">|</span> en_US.UTF-8
+</span><span class='line'><span class="o">(</span><span class="m">1</span> row<span class="o">)</span>
+</span><span class='line'>^D
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Create new database to store OSM data:</p>
+<h2>stop running clusters</h2>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">postgres</span><span class="o">=</span><span class="c"># create database osm;</span>
-</span><span class='line'>CREATE DATABASE
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo pg_lsclusters
+</span><span class='line'>sudo service postgresql stop
+</span><span class='line'>sudo mv /etc/init.d/postgresql /etc/init.d/postgresql.
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Connect to created database and add PostGIS and H-store extensions:</p>
+<h2>run pg_upgrade</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">cd</span> /tmp
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>check:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -98,20 +140,26 @@ local all postgres trust</p>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>psql -U postgres -d osm
-</span><span class='line'>psql <span class="o">(</span>9.3.4<span class="o">)</span>
-</span><span class='line'>Type <span class="s2">&quot;help&quot;</span> <span class="k">for</span> help.
-</span><span class='line'>
-</span><span class='line'><span class="nv">osm</span><span class="o">=</span><span class="c"># create extension postgis;</span>
-</span><span class='line'>CREATE EXTENSION
-</span><span class='line'><span class="nv">osm</span><span class="o">=</span><span class="c"># create extension hstore;</span>
-</span><span class='line'>CREATE EXTENSION
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade <span class="se">\</span>
+</span><span class='line'>   -b /usr/lib/postgresql/9.3/bin <span class="se">\</span>
+</span><span class='line'>   -B /usr/lib/postgresql/9.4/bin <span class="se">\</span>
+</span><span class='line'>   -d /var/lib/postgresql/9.3/main <span class="se">\</span>
+</span><span class='line'>   -D /var/lib/postgresql/9.4/main <span class="se">\</span>
+</span><span class='line'>   -o <span class="s1">&#39; -c config_file=/etc/postgresql/9.3/main/postgresql.conf&#39;</span> <span class="se">\</span>
+</span><span class='line'>   -O <span class="s1">&#39; -c config_file=/etc/postgresql/9.4/main/postgresql.conf&#39;</span> <span class="se">\</span>
+</span><span class='line'>   -p <span class="m">5432</span> <span class="se">\</span>
+</span><span class='line'>   -P <span class="m">5433</span> <span class="se">\</span>
+</span><span class='line'>   --check <span class="se">\</span>
+</span><span class='line'>   --verbose <span class="se">\</span>
+</span><span class='line'>   --retain
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Now we have the database we will use to load OSM data later.</p>
-
-<p>Now let&rsquo;s compile osm2pgsql:</p>
+<p>execute:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -120,32 +168,109 @@ local all postgres trust</p>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo apt-get install build-essential libxml2-dev libgeos++-dev libpq-dev libbz2-dev proj libtool automake git lua5.2 liblua5.2-0 liblua5.2-dev liblua5.1-0 libprotobuf-c0-dev protobuf-c-compiler
-</span><span class='line'><span class="nv">$ </span>wget https://github.com/openstreetmap/osm2pgsql/archive/0.84.0.zip
-</span><span class='line'><span class="nv">$ </span>unzip 0.84.0.zip
-</span><span class='line'><span class="nv">$ </span>rm 0.84.0.zip
-</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>osm2pgsql-0.84.0
-</span><span class='line'><span class="nv">$ </span>./autogen.sh <span class="o">&amp;&amp;</span> ./configure <span class="o">&amp;&amp;</span> make
-</span><span class='line'><span class="nv">$ </span>sudo make install
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade <span class="se">\</span>
+</span><span class='line'>   -b /usr/lib/postgresql/9.3/bin <span class="se">\</span>
+</span><span class='line'>   -B /usr/lib/postgresql/9.4/bin <span class="se">\</span>
+</span><span class='line'>   -d /var/lib/postgresql/9.3/main <span class="se">\</span>
+</span><span class='line'>   -D /var/lib/postgresql/9.4/main <span class="se">\</span>
+</span><span class='line'>   -o <span class="s1">&#39; -c config_file=/etc/postgresql/9.3/main/postgresql.conf&#39;</span> <span class="se">\</span>
+</span><span class='line'>   -O <span class="s1">&#39; -c config_file=/etc/postgresql/9.4/main/postgresql.conf&#39;</span> <span class="se">\</span>
+</span><span class='line'>   -p <span class="m">5432</span> <span class="se">\</span>
+</span><span class='line'>   -P <span class="m">5433</span> <span class="se">\</span>
+</span><span class='line'>   --verbose <span class="se">\</span>
+</span><span class='line'>   --retain <span class="se">\</span>
+</span><span class='line'>   --jobs<span class="o">=</span>4
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Now let&rsquo;s download osm file we will use for import.
-Here you can find different mirrors.</p>
+<h2>change 9.4 port to 5432</h2>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>wget http://download.geofabrik.de/north-america/us-northeast-latest.osm.bz2
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo vi /etc/postgresql/9.4/main/postgresql.conf  -- 5432
+</span><span class='line'>sudo vi /etc/postgresql/9.3/main/postgresql.conf  -- 5433
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>And run osm2pgsql:</p>
+<p>remove /var/lib/postgresql/9.4/main</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>bunzip2 -c us-northeast-latest.osm.bz2 <span class="p">|</span> /usr/local/bin/osm2pgsql --slim -E <span class="m">4326</span> -d osm -C <span class="m">1500</span> -S /usr/share/osm2pgsql/default.style -U postgres --hstore /dev/stdin
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo mv /etc/init.d/postgresql. /etc/init.d/postgresql
+</span><span class='line'>sudo service postgresql start 9.4
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>And waiting &hellip;</p>
+<h2>Remove the old packages</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>dpkg -l <span class="p">|</span> grep postgresql
+</span><span class='line'>apt-get remove postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Analyze and drop old</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo su  postgres
+</span><span class='line'>/tmp/analyze_new_cluster.sh
+</span><span class='line'>or /usr/lib/postgresql/9.4/bin/vacuumdb -dbluevine -Upostgres -h127.0.0.1
+</span><span class='line'>/tmp/delete_old_cluster.sh
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>On slave:</h2>
+
+<p>backup configs:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>mkdir ~/pg_config_backup
+</span><span class='line'>sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Install 9.4 packages and create the new cluster:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install postgresql-9.4 postgresql-contrib-9.4 postgresql-client-9.4 postgresql-9.4-pgespresso postgresql-server-dev-9.4
+</span><span class='line'>sudo -u postgres pg_basebackup -h 10.10.13.234 -D /data/postgresql/9.3/main -U replicator -v -P
+</span><span class='line'>mkdir  /data/postgresql/9.4/main
+</span><span class='line'>sudo chown -R  postgres.postgres /data/postgresql
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>On master:</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo -u postgres psql -x -c <span class="s2">&quot;select * from pg_stat_replication;&quot;</span>
+</span><span class='line'><span class="k">select</span> x id, x::text into <span class="nb">test </span>from generate_series<span class="o">(</span>1, 1000000<span class="o">)</span> x<span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>check table exists on slave servers
+check logs on all the servers</p>
+
+<p><a href="http://www.depesz.com/2015/02/27/how-to-pg_upgrade/">http://www.depesz.com/2015/02/27/how-to-pg_upgrade/</a>
+<a href="http://www.gab.lc/articles/migration_postgresql_9-3_to_9-4">http://www.gab.lc/articles/migration_postgresql_9-3_to_9-4</a>
+<a href="http://www.postgresql.org/docs/9.4/static/upgrading.html">http://www.postgresql.org/docs/9.4/static/upgrading.html</a>
+<a href="http://www.postgresql.org/docs/9.4/static/pgupgrade.html">http://www.postgresql.org/docs/9.4/static/pgupgrade.html</a>
+<a href="https://wiki.postgresql.org/wiki/Using_pg_upgrade_on_Ubuntu/Debian">https://wiki.postgresql.org/wiki/Using_pg_upgrade_on_Ubuntu/Debian</a></p>
 ]]></content>
   </entry>
   
