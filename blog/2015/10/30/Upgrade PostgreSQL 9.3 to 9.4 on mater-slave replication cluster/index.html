@@ -10,7 +10,10 @@
 
   
   <meta name="description" content="Preparations: backup DB cluster
-backup config: mkdir ~/pg_config_backup sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup add extra package if &hellip;">
+backup config: 1
+2
+mkdir ~/pg_config_backup
+sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup 3. add extra &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -89,26 +92,39 @@ backup config: mkdir ~/pg_config_backup sudo cp /etc/postgresql/9.3/main/* ~/pg_
 
 <ol>
 <li>backup DB cluster</li>
-<li>backup config:
- <code>
- mkdir ~/pg_config_backup
- sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup
-</code></li>
-<li>add extra package if missing:
- <code>
- sudo apt-get update
- sudo apt-get install postgresql-server-dev-9.3
-</code></li>
-<li>check correct repository setup:
- <code>
- echo "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main" &gt;&gt; /etc/apt/sources.list.d/pgdg.list
- sudo apt-get install wget ca-certificates
- wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-</code>
-
-<h3>Install 9.4 packages and create the new cluster:</h3></li>
+<li>backup config:</li>
 </ol>
 
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir ~/pg_config_backup
+</span><span class='line'>sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup</span></code></pre></td></tr></table></div></figure>
+
+
+<p>  <br/>
+3. add extra package if missing:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install postgresql-server-dev-9.3</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>check correct repository setup:</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>echo "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main" &gt;&gt; /etc/apt/sources.list.d/pgdg.list
+</span><span class='line'>sudo apt-get install wget ca-certificates
+</span><span class='line'>wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Install 9.4 packages and create the new cluster:</h3>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Upgrade | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/upgrade/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-01T12:00:46+02:00</updated>
+  <updated>2015-11-01T12:02:49+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -23,20 +23,20 @@
 <ol>
 <li>backup DB cluster</li>
 <li>backup config:
- <code>
- mkdir ~/pg_config_backup
- sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup
+<code>
+mkdir ~/pg_config_backup
+sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup
 </code></li>
 <li>add extra package if missing:
- <code>
- sudo apt-get update
- sudo apt-get install postgresql-server-dev-9.3
+<code>
+sudo apt-get update
+sudo apt-get install postgresql-server-dev-9.3
 </code></li>
 <li>check correct repository setup:
- <code>
- echo "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main" &gt;&gt; /etc/apt/sources.list.d/pgdg.list
- sudo apt-get install wget ca-certificates
- wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+<code>
+echo "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main" &gt;&gt; /etc/apt/sources.list.d/pgdg.list
+sudo apt-get install wget ca-certificates
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 </code>
 
 <h3>Install 9.4 packages and create the new cluster:</h3>
