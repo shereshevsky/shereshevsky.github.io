@@ -4,7 +4,7 @@
   <title><![CDATA[Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-01T12:04:52+02:00</updated>
+  <updated>2015-11-01T12:06:12+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -20,11 +20,8 @@
     <id>http://dbcaptain.com/blog/2015/10/30/Upgrade PostgreSQL 9.3 to 9.4 on mater-slave replication cluster</id>
     <content type="html"><![CDATA[<h3>Preparations:</h3>
 
-<ol>
-<li>backup DB cluster</li>
-<li>backup config:</li>
-</ol>
-
+<p>backup DB cluster
+backup config:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -33,7 +30,7 @@
 
 
 <p>  <br/>
-3. add extra package if missing:</p>
+add extra package if missing:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -41,10 +38,7 @@
 </span><span class='line'>sudo apt-get install postgresql-server-dev-9.3</span></code></pre></td></tr></table></div></figure>
 
 
-<ol>
-<li>check correct repository setup:</li>
-</ol>
-
+<p>check correct repository setup:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>

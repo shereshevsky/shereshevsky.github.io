@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Upgrade | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/upgrade/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-01T12:04:52+02:00</updated>
+  <updated>2015-11-01T12:06:12+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -20,24 +20,23 @@
     <id>http://dbcaptain.com/blog/2015/10/30/Upgrade PostgreSQL 9.3 to 9.4 on mater-slave replication cluster</id>
     <content type="html"><![CDATA[<h3>Preparations:</h3>
 
-<ol>
-<li>backup DB cluster</li>
-<li>backup config:
+<p>backup DB cluster
+backup config:
 <code>
 mkdir ~/pg_config_backup
 sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup
-</code></li>
-<li>add extra package if missing:
+</code>  <br/>
+add extra package if missing:
 <code>
 sudo apt-get update
 sudo apt-get install postgresql-server-dev-9.3
-</code></li>
-<li>check correct repository setup:
+</code>
+check correct repository setup:
 <code>
 echo "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main" &gt;&gt; /etc/apt/sources.list.d/pgdg.list
 sudo apt-get install wget ca-certificates
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-</code>
+</code></p>
 
 <h3>Install 9.4 packages and create the new cluster:</h3>
 
@@ -45,7 +44,7 @@ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-
 sudo apt-get install postgresql-9.4 postgresql-contrib-9.4 postgresql-client-9.4 postgresql-9.4-pgespresso postgresql-server-dev-9.4
 </code></pre>
 
-Drop 9.4 cluster if created by installer
+<p>Drop 9.4 cluster if created by installer
 <code>
 pg_dropcluster 9.4 main
 </code>
@@ -71,12 +70,12 @@ pg_ctlcluster 9.4 main start
 check:
 <code>
 postgres=# select datcollate, datctype from pg_database where datname = 'template0';
-datcollate  |  datctype   
+ datcollate  |  datctype   
 -------------+-------------
-en_US.UTF-8 | en_US.UTF-8
+ en_US.UTF-8 | en_US.UTF-8
 (1 row)
 ^D
-</code>
+</code></p>
 
 <h3>stop running clusters</h3>
 
@@ -90,36 +89,36 @@ sudo mv /etc/init.d/postgresql /etc/init.d/postgresql.
 <pre><code>cd /tmp
 </code></pre>
 
-check:
+<p>check:
 <code>
 sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade \
--b /usr/lib/postgresql/9.3/bin \
--B /usr/lib/postgresql/9.4/bin \
--d /data/postgresql/9.3/main \
--D /data/postgresql/9.4/main \
--o ' -c config_file=/etc/postgresql/9.3/main/postgresql.conf' \
--O ' -c config_file=/etc/postgresql/9.4/main/postgresql.conf' \
--p 5432 \
--P 5433 \
---check \
---verbose \
---retain
+   -b /usr/lib/postgresql/9.3/bin \
+   -B /usr/lib/postgresql/9.4/bin \
+   -d /data/postgresql/9.3/main \
+   -D /data/postgresql/9.4/main \
+   -o ' -c config_file=/etc/postgresql/9.3/main/postgresql.conf' \
+   -O ' -c config_file=/etc/postgresql/9.4/main/postgresql.conf' \
+   -p 5432 \
+   -P 5433 \
+   --check \
+   --verbose \
+   --retain
 </code>
 execute:
 <code>
 sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade \
--b /usr/lib/postgresql/9.3/bin \
--B /usr/lib/postgresql/9.4/bin \
--d /data/postgresql/9.3/main \
--D /data/postgresql/9.4/main \
--o ' -c config_file=/etc/postgresql/9.3/main/postgresql.conf' \
--O ' -c config_file=/etc/postgresql/9.4/main/postgresql.conf' \
--p 5432 \
--P 5433 \
---verbose \
---retain \
---jobs=4
-</code>
+   -b /usr/lib/postgresql/9.3/bin \
+   -B /usr/lib/postgresql/9.4/bin \
+   -d /data/postgresql/9.3/main \
+   -D /data/postgresql/9.4/main \
+   -o ' -c config_file=/etc/postgresql/9.3/main/postgresql.conf' \
+   -O ' -c config_file=/etc/postgresql/9.4/main/postgresql.conf' \
+   -p 5432 \
+   -P 5433 \
+   --verbose \
+   --retain \
+   --jobs=4
+</code></p>
 
 <h3>change 9.4 port to 5432</h3>
 
@@ -127,11 +126,11 @@ sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade \
 sudo sed -i 's/5432/5433/g' /etc/postgresql/9.3/main/postgresql.conf
 </code></pre>
 
-remove /var/lib/postgresql/9.4/main
+<p>remove /var/lib/postgresql/9.4/main
 <code>
 sudo mv /etc/init.d/postgresql. /etc/init.d/postgresql
 pg_ctlcluster 9.4 main start
-</code>
+</code></p>
 
 <h3>(optioanl) Remove the old packages</h3>
 
@@ -145,9 +144,7 @@ apt-get remove postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3
 /tmp/analyze_new_cluster.sh
 or /usr/lib/postgresql/9.4/bin/vacuumdb -dbluevine -Upostgres -h127.0.0.1 
 /tmp/delete_old_cluster.sh
-</code></pre></li>
-</ol>
-
+</code></pre>
 
 <h3>On slave:</h3>
 
