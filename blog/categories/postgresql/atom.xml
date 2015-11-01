@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Postgresql | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/postgresql/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-01T12:02:49+02:00</updated>
+  <updated>2015-11-01T12:04:52+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -49,35 +49,218 @@ Drop 9.4 cluster if created by installer
 <code>
 pg_dropcluster 9.4 main
 </code>
+change config to 9.4
+<code>
 cd /etc/postgresql
 rm -rf 9.4
 cp -R 9.3/ 9.4
-<code>
-change config to 9.4
+sed -i 's/9.3/9.4/g' postgresql.conf
+grep '9.' postgresql.conf
 </code>
-sed -i &rsquo;s/9.3/9.4/g' postgresql.conf
-grep &lsquo;9.&rsquo; postgresql.conf
-<code>
 Initialize the new PostgreSQL 9.4 cluster:
-</code>
+<code>
 sudo chown -R  postgres.postgres /etc/postgresql
 sudo chown -R  postgres.postgres /data/postgresql
 sudo su postgres
 pg_createcluster -e UTF8 -p 5433 -d /data/postgresql/9.4/main 9.4 main
-<code>
+</code>
 start:
-</code>
-pg_ctlcluster 9.4 main start
 <code>
-check:
+pg_ctlcluster 9.4 main start
 </code>
-postgres=# select datcollate, datctype from pg_database where datname = &lsquo;template0&rsquo;;
-datcollate  |  datctype <br/>
-&mdash;&mdash;&mdash;&mdash;-+&mdash;&mdash;&mdash;&mdash;-
+check:
+<code>
+postgres=# select datcollate, datctype from pg_database where datname = 'template0';
+datcollate  |  datctype   
+-------------+-------------
 en_US.UTF-8 | en_US.UTF-8
 (1 row)
 ^D
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</code>
+
+<h3>stop running clusters</h3>
+
+<pre><code>sudo pg_lsclusters
+sudo service postgresql stop
+sudo mv /etc/init.d/postgresql /etc/init.d/postgresql.
+</code></pre>
+
+<h3>run pg_upgrade</h3>
+
+<pre><code>cd /tmp
+</code></pre>
+
+check:
+<code>
+sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade \
+-b /usr/lib/postgresql/9.3/bin \
+-B /usr/lib/postgresql/9.4/bin \
+-d /data/postgresql/9.3/main \
+-D /data/postgresql/9.4/main \
+-o ' -c config_file=/etc/postgresql/9.3/main/postgresql.conf' \
+-O ' -c config_file=/etc/postgresql/9.4/main/postgresql.conf' \
+-p 5432 \
+-P 5433 \
+--check \
+--verbose \
+--retain
+</code>
+execute:
+<code>
+sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade \
+-b /usr/lib/postgresql/9.3/bin \
+-B /usr/lib/postgresql/9.4/bin \
+-d /data/postgresql/9.3/main \
+-D /data/postgresql/9.4/main \
+-o ' -c config_file=/etc/postgresql/9.3/main/postgresql.conf' \
+-O ' -c config_file=/etc/postgresql/9.4/main/postgresql.conf' \
+-p 5432 \
+-P 5433 \
+--verbose \
+--retain \
+--jobs=4
+</code>
+
+<h3>change 9.4 port to 5432</h3>
+
+<pre><code>sudo sed -i 's/5433/5432/g' /etc/postgresql/9.4/main/postgresql.conf
+sudo sed -i 's/5432/5433/g' /etc/postgresql/9.3/main/postgresql.conf
+</code></pre>
+
+remove /var/lib/postgresql/9.4/main
+<code>
+sudo mv /etc/init.d/postgresql. /etc/init.d/postgresql
+pg_ctlcluster 9.4 main start
+</code>
+
+<h3>(optioanl) Remove the old packages</h3>
+
+<pre><code>dpkg -l | grep postgresql
+apt-get remove postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3
+</code></pre>
+
+<h3>Analyze and drop old</h3>
+
+<pre><code>sudo su  postgres
+/tmp/analyze_new_cluster.sh
+or /usr/lib/postgresql/9.4/bin/vacuumdb -dbluevine -Upostgres -h127.0.0.1 
+/tmp/delete_old_cluster.sh
+</code></pre></li>
+</ol>
+
+
+<h3>On slave:</h3>
+
+<p>backup configs:
+<code>
+mkdir ~/pg_config_backup
+sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup
+</code>
+Install 9.4 packages and create the new cluster:
+<code>
+sudo apt-get update
+sudo apt-get install postgresql-9.4 postgresql-contrib-9.4 postgresql-client-9.4 postgresql-9.4-pgespresso postgresql-server-dev-9.4
+pg_dropcluster 9.4 main --stop
+mkdir  /data/postgresql/9.4/main
+sudo chown -R  postgres.postgres /data/postgresql
+cd /etc/postgresql
+rm -rf 9.4
+cp -R 9.3/ 9.4
+</code></p>
+
+<h3>On master:</h3>
+
+<pre><code>psql -U postgres -c "select pg_start_backup('clone',true)"
+rsync -av --exclude pg_xlog --exclude postgresql.conf --exclude postgresql.pid \ 
+     /data/postgresql/9.4/*  $SLAVE_HOST:/data/postgresql/9.4/
+psql -U postgres -c "select pg_stop_backup()"
+rsync -av /data/postgresql/9.4/main/pg_xlog $SLAVE_HOST:/data/postgresql/9.4/main/
+</code></pre>
+
+<h3>ON slave:</h3>
+
+<p>recovery.conf in /data/postgres/9.4/main should look like this:
+<code>
+standby_mode = 'on'
+primary_conninfo = 'host=$MASTER_HOST port=5432 user=replicator password=bvmyreplpasserfvgty sslmode=require'
+trigger_file = '/tmp/postgresql.trigger'
+</code>
+sudo service postgresql start</p>
+
+<h3>On master:</h3>
+
+<p>sudo -u postgres psql -x -c &ldquo;select * from pg_stat_replication&rdquo;
+sudo -u postgres psql -x -c &ldquo;select x id, x::text into test from generate_series(1, 1000000) x&rdquo;</p>
+
+<p>check table exists on slave servers
+check logs on all the servers</p>
+
+<p><a href="http://www.depesz.com/2015/02/27/how-to-pg_upgrade/">http://www.depesz.com/2015/02/27/how-to-pg_upgrade/</a>
+<a href="http://www.gab.lc/articles/migration_postgresql_9-3_to_9-4">http://www.gab.lc/articles/migration_postgresql_9-3_to_9-4</a>
+<a href="http://www.postgresql.org/docs/9.4/static/upgrading.html">http://www.postgresql.org/docs/9.4/static/upgrading.html</a>
+<a href="http://www.postgresql.org/docs/9.4/static/pgupgrade.html">http://www.postgresql.org/docs/9.4/static/pgupgrade.html</a>
+<a href="https://wiki.postgresql.org/wiki/Using_pg_upgrade_on_Ubuntu/Debian">https://wiki.postgresql.org/wiki/Using_pg_upgrade_on_Ubuntu/Debian</a>
+<a href="https://wiki.postgresql.org/wiki/Binary_Replication_Tutorial">https://wiki.postgresql.org/wiki/Binary_Replication_Tutorial</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Load OSM Data to PostgreSQL]]></title>
+    <link href="http://dbcaptain.com/blog/2015/10/29/Load%20OSM%20data%20to%20PostgreSQL/"/>
+    <updated>2015-10-29T16:43:15+02:00</updated>
+    <id>http://dbcaptain.com/blog/2015/10/29/Load OSM data to PostgreSQL</id>
+    <content type="html"><![CDATA[<p>I&rsquo;m using a small DigitalOcean droplet to load fresh OSM data to PostgreSQL.
+The 2G memory instance is prefereable, change it just for OSM load and you can change it back after.
+I&rsquo;m going to use current stable versions:</p>
+
+<ul>
+<li>PostgreSQL 9.3</li>
+<li>PostGIS 2.1</li>
+<li>osm2pgsql 0.84</li>
+<li>Ubuntu 12.04.4 LTS</li>
+</ul>
+
+
+<p>As reference using osm2pgsql article in OSM wiki.
+Reference for Postgres/PostGIS installation using PostgreSQL installation guides wiki article and Official Ubuntu Community Wiki.
+This one was good too.</p>
+
+<pre><code class="sh">$ echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" &gt; /etc/apt/sources.list.d/postgresql.list
+$ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+$ sudo apt-get update
+$ sudo apt-get upgrade
+$ sudo apt-get install postgresql-9.3 postgresql-9.3-postgis-2.1 postgresql-contrib-9.3
+</code></pre>
+
+<p>Edit pg_hba.config for postgres to connect locally.</p>
+
+<pre><code class="sh">$ sudo vi /etc/postgresql/9.3/main/pg_hba.conf
+</code></pre>
+
+<p>First not commented line will be like this (change peer to trust):
+local all postgres trust</p>
+
+<p>Restart postgresql service:
+<code>sh
+$ sudo service postgresql restart
+</code>
+Now check you are able to connect to postgres (default) database:</p>
+
+<pre><code class="sh">$ psql -U postgres
+psql (9.3.4)
+Type "help" for help.
+
+postgres=#
+</code></pre>
+
+<p>Create new database to store OSM data:</p>
+
+<pre><code class="sh">postgres=# create database osm;
+CREATE DATABASE
+</code></pre>
+
+<p>Connect to created database and add PostGIS and H-store extensions:
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -85,373 +268,15 @@ en_US.UTF-8 | en_US.UTF-8
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-<span class='line-number'>99</span>
-<span class='line-number'>100</span>
-<span class='line-number'>101</span>
-<span class='line-number'>102</span>
-<span class='line-number'>103</span>
-<span class='line-number'>104</span>
-<span class='line-number'>105</span>
-<span class='line-number'>106</span>
-<span class='line-number'>107</span>
-<span class='line-number'>108</span>
-<span class='line-number'>109</span>
-<span class='line-number'>110</span>
-<span class='line-number'>111</span>
-<span class='line-number'>112</span>
-<span class='line-number'>113</span>
-<span class='line-number'>114</span>
-<span class='line-number'>115</span>
-<span class='line-number'>116</span>
-<span class='line-number'>117</span>
-<span class='line-number'>118</span>
-<span class='line-number'>119</span>
-<span class='line-number'>120</span>
-<span class='line-number'>121</span>
-<span class='line-number'>122</span>
-<span class='line-number'>123</span>
-<span class='line-number'>124</span>
-<span class='line-number'>125</span>
-<span class='line-number'>126</span>
-<span class='line-number'>127</span>
-<span class='line-number'>128</span>
-<span class='line-number'>129</span>
-<span class='line-number'>130</span>
-<span class='line-number'>131</span>
-<span class='line-number'>132</span>
-<span class='line-number'>133</span>
-<span class='line-number'>134</span>
-<span class='line-number'>135</span>
-<span class='line-number'>136</span>
-<span class='line-number'>137</span>
-<span class='line-number'>138</span>
-<span class='line-number'>139</span>
-<span class='line-number'>140</span>
-<span class='line-number'>141</span>
-<span class='line-number'>142</span>
-<span class='line-number'>143</span>
-<span class='line-number'>144</span>
-<span class='line-number'>145</span>
-<span class='line-number'>146</span>
-<span class='line-number'>147</span>
-<span class='line-number'>148</span>
-<span class='line-number'>149</span>
-<span class='line-number'>150</span>
-<span class='line-number'>151</span>
-<span class='line-number'>152</span>
-<span class='line-number'>153</span>
-<span class='line-number'>154</span>
-<span class='line-number'>155</span>
-<span class='line-number'>156</span>
-<span class='line-number'>157</span>
-<span class='line-number'>158</span>
-<span class='line-number'>159</span>
-<span class='line-number'>160</span>
-<span class='line-number'>161</span>
-<span class='line-number'>162</span>
-<span class='line-number'>163</span>
-<span class='line-number'>164</span>
-<span class='line-number'>165</span>
-<span class='line-number'>166</span>
-<span class='line-number'>167</span>
-<span class='line-number'>168</span>
-<span class='line-number'>169</span>
-<span class='line-number'>170</span>
-<span class='line-number'>171</span>
-<span class='line-number'>172</span>
-<span class='line-number'>173</span>
-<span class='line-number'>174</span>
-<span class='line-number'>175</span>
-<span class='line-number'>176</span>
-<span class='line-number'>177</span>
-<span class='line-number'>178</span>
-<span class='line-number'>179</span>
-<span class='line-number'>180</span>
-<span class='line-number'>181</span>
-<span class='line-number'>182</span>
-<span class='line-number'>183</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>
-</span><span class='line'>&lt;h3&gt;stop running clusters&lt;/h3&gt;
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>psql -U postgres -d osm
+</span><span class='line'>psql <span class="o">(</span>9.3.4<span class="o">)</span>
+</span><span class='line'>Type <span class="p">&amp;</span>ldquo<span class="p">;</span><span class="nb">help</span><span class="p">&amp;</span>rdquo<span class="p">;</span> <span class="k">for</span> help.&lt;/p&gt;
 </span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;sudo pg_lsclusters
-</span><span class='line'>sudo service postgresql stop
-</span><span class='line'>sudo mv /etc/init.d/postgresql /etc/init.d/postgresql.
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h3&gt;run pg_upgrade&lt;/h3&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;cd /tmp
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>check:
-</span><span class='line'>&lt;code&gt;
-</span><span class='line'>sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade \
-</span><span class='line'>-b /usr/lib/postgresql/9.3/bin \
-</span><span class='line'>-B /usr/lib/postgresql/9.4/bin \
-</span><span class='line'>-d /data/postgresql/9.3/main \
-</span><span class='line'>-D /data/postgresql/9.4/main \
-</span><span class='line'>-o ' -c config_file=/etc/postgresql/9.3/main/postgresql.conf' \
-</span><span class='line'>-O ' -c config_file=/etc/postgresql/9.4/main/postgresql.conf' \
-</span><span class='line'>-p 5432 \
-</span><span class='line'>-P 5433 \
-</span><span class='line'>--check \
-</span><span class='line'>--verbose \
-</span><span class='line'>--retain
-</span><span class='line'>&lt;/code&gt;
-</span><span class='line'>execute:
-</span><span class='line'>&lt;code&gt;
-</span><span class='line'>sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade \
-</span><span class='line'>-b /usr/lib/postgresql/9.3/bin \
-</span><span class='line'>-B /usr/lib/postgresql/9.4/bin \
-</span><span class='line'>-d /data/postgresql/9.3/main \
-</span><span class='line'>-D /data/postgresql/9.4/main \
-</span><span class='line'>-o ' -c config_file=/etc/postgresql/9.3/main/postgresql.conf' \
-</span><span class='line'>-O ' -c config_file=/etc/postgresql/9.4/main/postgresql.conf' \
-</span><span class='line'>-p 5432 \
-</span><span class='line'>-P 5433 \
-</span><span class='line'>--verbose \
-</span><span class='line'>--retain \
-</span><span class='line'>--jobs=4
-</span><span class='line'>&lt;/code&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h3&gt;change 9.4 port to 5432&lt;/h3&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;sudo sed -i 's/5433/5432/g' /etc/postgresql/9.4/main/postgresql.conf
-</span><span class='line'>sudo sed -i 's/5432/5433/g' /etc/postgresql/9.3/main/postgresql.conf
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>remove /var/lib/postgresql/9.4/main
-</span><span class='line'>&lt;code&gt;
-</span><span class='line'>sudo mv /etc/init.d/postgresql. /etc/init.d/postgresql
-</span><span class='line'>pg_ctlcluster 9.4 main start
-</span><span class='line'>&lt;/code&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h3&gt;(optioanl) Remove the old packages&lt;/h3&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;dpkg -l | grep postgresql
-</span><span class='line'>apt-get remove postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h3&gt;Analyze and drop old&lt;/h3&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;sudo su  postgres
-</span><span class='line'>/tmp/analyze_new_cluster.sh
-</span><span class='line'>or /usr/lib/postgresql/9.4/bin/vacuumdb -dbluevine -Upostgres -h127.0.0.1 
-</span><span class='line'>/tmp/delete_old_cluster.sh
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
-</span><span class='line'>&lt;/ol&gt;
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>&lt;h3&gt;On slave:&lt;/h3&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;backup configs:
-</span><span class='line'>&lt;code&gt;
-</span><span class='line'>mkdir ~/pg_config_backup
-</span><span class='line'>sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup
-</span><span class='line'>&lt;/code&gt;
-</span><span class='line'>Install 9.4 packages and create the new cluster:
-</span><span class='line'>&lt;code&gt;
-</span><span class='line'>sudo apt-get update
-</span><span class='line'>sudo apt-get install postgresql-9.4 postgresql-contrib-9.4 postgresql-client-9.4 postgresql-9.4-pgespresso postgresql-server-dev-9.4
-</span><span class='line'>pg_dropcluster 9.4 main --stop
-</span><span class='line'>mkdir  /data/postgresql/9.4/main
-</span><span class='line'>sudo chown -R  postgres.postgres /data/postgresql
-</span><span class='line'>cd /etc/postgresql
-</span><span class='line'>rm -rf 9.4
-</span><span class='line'>cp -R 9.3/ 9.4
-</span><span class='line'>&lt;/code&gt;&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h3&gt;On master:&lt;/h3&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;psql -U postgres -c "select pg_start_backup('clone',true)"
-</span><span class='line'>rsync -av --exclude pg_xlog --exclude postgresql.conf --exclude postgresql.pid \ 
-</span><span class='line'>     /data/postgresql/9.4/*  $SLAVE_HOST:/data/postgresql/9.4/
-</span><span class='line'>psql -U postgres -c "select pg_stop_backup()"
-</span><span class='line'>rsync -av /data/postgresql/9.4/main/pg_xlog $SLAVE_HOST:/data/postgresql/9.4/main/
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h3&gt;ON slave:&lt;/h3&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;recovery.conf in /data/postgres/9.4/main should look like this:
-</span><span class='line'>&lt;code&gt;
-</span><span class='line'>standby_mode = 'on'
-</span><span class='line'>primary_conninfo = 'host=$MASTER_HOST port=5432 user=replicator password=bvmyreplpasserfvgty sslmode=require'
-</span><span class='line'>trigger_file = '/tmp/postgresql.trigger'
-</span><span class='line'>&lt;/code&gt;
-</span><span class='line'>sudo service postgresql start&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;h3&gt;On master:&lt;/h3&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;sudo -u postgres psql -x -c &ldquo;select * from pg_stat_replication&rdquo;
-</span><span class='line'>sudo -u postgres psql -x -c &ldquo;select x id, x::text into test from generate_series(1, 1000000) x&rdquo;&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;check table exists on slave servers
-</span><span class='line'>check logs on all the servers&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;&lt;a href="http://www.depesz.com/2015/02/27/how-to-pg_upgrade/"&gt;http://www.depesz.com/2015/02/27/how-to-pg_upgrade/&lt;/a&gt;
-</span><span class='line'>&lt;a href="http://www.gab.lc/articles/migration_postgresql_9-3_to_9-4"&gt;http://www.gab.lc/articles/migration_postgresql_9-3_to_9-4&lt;/a&gt;
-</span><span class='line'>&lt;a href="http://www.postgresql.org/docs/9.4/static/upgrading.html"&gt;http://www.postgresql.org/docs/9.4/static/upgrading.html&lt;/a&gt;
-</span><span class='line'>&lt;a href="http://www.postgresql.org/docs/9.4/static/pgupgrade.html"&gt;http://www.postgresql.org/docs/9.4/static/pgupgrade.html&lt;/a&gt;
-</span><span class='line'>&lt;a href="https://wiki.postgresql.org/wiki/Using_pg_upgrade_on_Ubuntu/Debian"&gt;https://wiki.postgresql.org/wiki/Using_pg_upgrade_on_Ubuntu/Debian&lt;/a&gt;
-</span><span class='line'>&lt;a href="https://wiki.postgresql.org/wiki/Binary_Replication_Tutorial"&gt;https://wiki.postgresql.org/wiki/Binary_Replication_Tutorial&lt;/a&gt;&lt;/p&gt;
-</span><span class='line'>]]&gt;&lt;/content&gt;
-</span><span class='line'>  &lt;/entry&gt;
-</span><span class='line'>  
-</span><span class='line'>  &lt;entry&gt;
-</span><span class='line'>    &lt;title type="html"&gt;&lt;![CDATA[Load OSM Data to PostgreSQL]]&gt;&lt;/title&gt;
-</span><span class='line'>    &lt;link href="http://dbcaptain.com/blog/2015/10/29/Load%20OSM%20data%20to%20PostgreSQL/"/&gt;
-</span><span class='line'>    &lt;updated&gt;2015-10-29T16:43:15+02:00&lt;/updated&gt;
-</span><span class='line'>    &lt;id&gt;http://dbcaptain.com/blog/2015/10/29/Load OSM data to PostgreSQL&lt;/id&gt;
-</span><span class='line'>    &lt;content type="html"&gt;&lt;![CDATA[&lt;p&gt;I&rsquo;m using a small DigitalOcean droplet to load fresh OSM data to PostgreSQL.
-</span><span class='line'>The 2G memory instance is prefereable, change it just for OSM load and you can change it back after.
-</span><span class='line'>I&rsquo;m going to use current stable versions:&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;ul&gt;
-</span><span class='line'>&lt;li&gt;PostgreSQL 9.3&lt;/li&gt;
-</span><span class='line'>&lt;li&gt;PostGIS 2.1&lt;/li&gt;
-</span><span class='line'>&lt;li&gt;osm2pgsql 0.84&lt;/li&gt;
-</span><span class='line'>&lt;li&gt;Ubuntu 12.04.4 LTS&lt;/li&gt;
-</span><span class='line'>&lt;/ul&gt;
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;As reference using osm2pgsql article in OSM wiki.
-</span><span class='line'>Reference for Postgres/PostGIS installation using PostgreSQL installation guides wiki article and Official Ubuntu Community Wiki.
-</span><span class='line'>This one was good too.&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code class="sh"&gt;$ echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" &gt; /etc/apt/sources.list.d/postgresql.list
-</span><span class='line'>$ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-</span><span class='line'>$ sudo apt-get update
-</span><span class='line'>$ sudo apt-get upgrade
-</span><span class='line'>$ sudo apt-get install postgresql-9.3 postgresql-9.3-postgis-2.1 postgresql-contrib-9.3
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;Edit pg_hba.config for postgres to connect locally.&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code class="sh"&gt;$ sudo vi /etc/postgresql/9.3/main/pg_hba.conf
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;First not commented line will be like this (change peer to trust):
-</span><span class='line'>local all postgres trust&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;Restart postgresql service:
-</span><span class='line'>&lt;code&gt;sh
-</span><span class='line'>$ sudo service postgresql restart
-</span><span class='line'>&lt;/code&gt;
-</span><span class='line'>Now check you are able to connect to postgres (default) database:&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code class="sh"&gt;$ psql -U postgres
-</span><span class='line'>psql (9.3.4)
-</span><span class='line'>Type "help" for help.
-</span><span class='line'>
-</span><span class='line'>postgres=#
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;Create new database to store OSM data:&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code class="sh"&gt;postgres=# create database osm;
-</span><span class='line'>CREATE DATABASE
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;Connect to created database and add PostGIS and H-store extensions:</span></code></pre></td></tr></table></div></figure>sh
-$ psql -U postgres -d osm
-psql (9.3.4)
-Type &ldquo;help&rdquo; for help.</p>
-
-<p>osm=# create extension postgis;
-CREATE EXTENSION
-osm=# create extension hstore;
-CREATE EXTENSION
-```
+</span><span class='line'>&lt;p&gt;osm<span class="o">=</span><span class="c"># create extension postgis;</span>
+</span><span class='line'>CREATE EXTENSION
+</span><span class='line'><span class="nv">osm</span><span class="o">=</span><span class="c"># create extension hstore;</span>
+</span><span class='line'>CREATE EXTENSION
+</span></code></pre></td></tr></table></div></figure>
 Now we have the database we will use to load OSM data later.</p>
 
 <p>Now let&rsquo;s compile osm2pgsql:</p>

@@ -141,168 +141,219 @@ sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup 3. add extra &hellip;">
 </pre></td><td class='code'><pre><code class=''><span class='line'>pg_dropcluster 9.4 main</span></code></pre></td></tr></table></div></figure>
 
 
-<p>cd /etc/postgresql
-rm -rf 9.4
-cp -R 9.3/ 9.4</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>change config to 9.4</span></code></pre></td></tr></table></div></figure>
-
-
-<p>sed -i &rsquo;s/9.3/9.4/g' postgresql.conf
-grep &lsquo;9.&rsquo; postgresql.conf</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Initialize the new PostgreSQL 9.4 cluster:</span></code></pre></td></tr></table></div></figure>
-
-
-<p>sudo chown -R  postgres.postgres /etc/postgresql
-sudo chown -R  postgres.postgres /data/postgresql
-sudo su postgres
-pg_createcluster -e UTF8 -p 5433 -d /data/postgresql/9.4/main 9.4 main</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>start:</span></code></pre></td></tr></table></div></figure>
-
-
-<p>pg_ctlcluster 9.4 main start</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>check:</span></code></pre></td></tr></table></div></figure>
-
-
-<p>postgres=# select datcollate, datctype from pg_database where datname = &lsquo;template0&rsquo;;
- datcollate  |  datctype <br/>
-&mdash;&mdash;&mdash;&mdash;-+&mdash;&mdash;&mdash;&mdash;-
- en_US.UTF-8 | en_US.UTF-8
-(1 row)
-^D</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>### stop running clusters</span></code></pre></td></tr></table></div></figure>
-
-
-<p>sudo pg_lsclusters
-sudo service postgresql stop
-sudo mv /etc/init.d/postgresql /etc/init.d/postgresql.</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>### run pg_upgrade</span></code></pre></td></tr></table></div></figure>
-
-
-<p>cd /tmp</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>check:</span></code></pre></td></tr></table></div></figure>
-
-
-<p>sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade \
-   -b /usr/lib/postgresql/9.3/bin \
-   -B /usr/lib/postgresql/9.4/bin \
-   -d /data/postgresql/9.3/main \
-   -D /data/postgresql/9.4/main \
-   -o &lsquo; -c config_file=/etc/postgresql/9.3/main/postgresql.conf&rsquo; \
-   -O &lsquo; -c config_file=/etc/postgresql/9.4/main/postgresql.conf&rsquo; \
-   -p 5432 \
-   -P 5433 \
-   &ndash;check \
-   &ndash;verbose \
-   &ndash;retain</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>execute:</span></code></pre></td></tr></table></div></figure>
-
-
-<p>sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade \
-   -b /usr/lib/postgresql/9.3/bin \
-   -B /usr/lib/postgresql/9.4/bin \
-   -d /data/postgresql/9.3/main \
-   -D /data/postgresql/9.4/main \
-   -o &lsquo; -c config_file=/etc/postgresql/9.3/main/postgresql.conf&rsquo; \
-   -O &lsquo; -c config_file=/etc/postgresql/9.4/main/postgresql.conf&rsquo; \
-   -p 5432 \
-   -P 5433 \
-   &ndash;verbose \
-   &ndash;retain \
-   &ndash;jobs=4</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>### change 9.4 port to 5432</span></code></pre></td></tr></table></div></figure>
-
-
-<p>sudo sed -i &rsquo;s/5433/5432/g' /etc/postgresql/9.4/main/postgresql.conf
-sudo sed -i &rsquo;s/5432/5433/g' /etc/postgresql/9.3/main/postgresql.conf</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>remove /var/lib/postgresql/9.4/main</span></code></pre></td></tr></table></div></figure>
-
-
-<p>sudo mv /etc/init.d/postgresql. /etc/init.d/postgresql
-pg_ctlcluster 9.4 main start</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>### (optioanl) Remove the old packages</span></code></pre></td></tr></table></div></figure>
-
-
-<p>dpkg -l | grep postgresql
-apt-get remove postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>### Analyze and drop old</span></code></pre></td></tr></table></div></figure>
-
-
-<p>sudo su  postgres
-/tmp/analyze_new_cluster.sh
-or /usr/lib/postgresql/9.4/bin/vacuumdb -dbluevine -Upostgres -h127.0.0.1
-/tmp/delete_old_cluster.sh</p>
+<p>change config to 9.4</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>
-</span><span class='line'>### On slave:
-</span><span class='line'>
-</span><span class='line'>backup configs:</span></code></pre></td></tr></table></div></figure>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /etc/postgresql
+</span><span class='line'>rm -rf 9.4
+</span><span class='line'>cp -R 9.3/ 9.4
+</span><span class='line'>sed -i 's/9.3/9.4/g' postgresql.conf
+</span><span class='line'>grep '9.' postgresql.conf</span></code></pre></td></tr></table></div></figure>
 
 
-<p>mkdir ~/pg_config_backup
-sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Install 9.4 packages and create the new cluster:</span></code></pre></td></tr></table></div></figure>
-
-
-<p>sudo apt-get update
-sudo apt-get install postgresql-9.4 postgresql-contrib-9.4 postgresql-client-9.4 postgresql-9.4-pgespresso postgresql-server-dev-9.4
-pg_dropcluster 9.4 main &ndash;stop
-mkdir  /data/postgresql/9.4/main
-sudo chown -R  postgres.postgres /data/postgresql
-cd /etc/postgresql
-rm -rf 9.4
-cp -R 9.3/ 9.4</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>### On master:</span></code></pre></td></tr></table></div></figure>
-
-
-<p>psql -U postgres -c &ldquo;select pg_start_backup(&lsquo;clone&rsquo;,true)&rdquo;
-rsync -av &ndash;exclude pg_xlog &ndash;exclude postgresql.conf &ndash;exclude postgresql.pid \
-     /data/postgresql/9.4/*  $SLAVE_HOST:/data/postgresql/9.4/
-psql -U postgres -c &ldquo;select pg_stop_backup()&rdquo;
-rsync -av /data/postgresql/9.4/main/pg_xlog $SLAVE_HOST:/data/postgresql/9.4/main/</p>
+<p>Initialize the new PostgreSQL 9.4 cluster:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>### ON slave:
-</span><span class='line'>recovery.conf in /data/postgres/9.4/main should look like this:</span></code></pre></td></tr></table></div></figure>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo chown -R  postgres.postgres /etc/postgresql
+</span><span class='line'>sudo chown -R  postgres.postgres /data/postgresql
+</span><span class='line'>sudo su postgres
+</span><span class='line'>pg_createcluster -e UTF8 -p 5433 -d /data/postgresql/9.4/main 9.4 main</span></code></pre></td></tr></table></div></figure>
 
 
-<p>standby_mode = &lsquo;on&rsquo;
-primary_conninfo = &lsquo;host=$MASTER_HOST port=5432 user=replicator password=bvmyreplpasserfvgty sslmode=require&rsquo;
-trigger_file = &lsquo;/tmp/postgresql.trigger&rsquo;
-```
-sudo service postgresql start</p>
+<p>start:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>pg_ctlcluster 9.4 main start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>check:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>postgres=# select datcollate, datctype from pg_database where datname = 'template0';
+</span><span class='line'> datcollate  |  datctype   
+</span><span class='line'>-------------+-------------
+</span><span class='line'> en_US.UTF-8 | en_US.UTF-8
+</span><span class='line'>(1 row)
+</span><span class='line'>^D</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>stop running clusters</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo pg_lsclusters
+</span><span class='line'>sudo service postgresql stop
+</span><span class='line'>sudo mv /etc/init.d/postgresql /etc/init.d/postgresql.</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>run pg_upgrade</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /tmp</span></code></pre></td></tr></table></div></figure>
+
+
+<p>check:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade \
+</span><span class='line'>   -b /usr/lib/postgresql/9.3/bin \
+</span><span class='line'>   -B /usr/lib/postgresql/9.4/bin \
+</span><span class='line'>   -d /data/postgresql/9.3/main \
+</span><span class='line'>   -D /data/postgresql/9.4/main \
+</span><span class='line'>   -o ' -c config_file=/etc/postgresql/9.3/main/postgresql.conf' \
+</span><span class='line'>   -O ' -c config_file=/etc/postgresql/9.4/main/postgresql.conf' \
+</span><span class='line'>   -p 5432 \
+</span><span class='line'>   -P 5433 \
+</span><span class='line'>   --check \
+</span><span class='line'>   --verbose \
+</span><span class='line'>   --retain</span></code></pre></td></tr></table></div></figure>
+
+
+<p>execute:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo -H -u postgres /usr/lib/postgresql/9.4/bin/pg_upgrade \
+</span><span class='line'>   -b /usr/lib/postgresql/9.3/bin \
+</span><span class='line'>   -B /usr/lib/postgresql/9.4/bin \
+</span><span class='line'>   -d /data/postgresql/9.3/main \
+</span><span class='line'>   -D /data/postgresql/9.4/main \
+</span><span class='line'>   -o ' -c config_file=/etc/postgresql/9.3/main/postgresql.conf' \
+</span><span class='line'>   -O ' -c config_file=/etc/postgresql/9.4/main/postgresql.conf' \
+</span><span class='line'>   -p 5432 \
+</span><span class='line'>   -P 5433 \
+</span><span class='line'>   --verbose \
+</span><span class='line'>   --retain \
+</span><span class='line'>   --jobs=4</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>change 9.4 port to 5432</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo sed -i 's/5433/5432/g' /etc/postgresql/9.4/main/postgresql.conf
+</span><span class='line'>sudo sed -i 's/5432/5433/g' /etc/postgresql/9.3/main/postgresql.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<p>remove /var/lib/postgresql/9.4/main</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo mv /etc/init.d/postgresql. /etc/init.d/postgresql
+</span><span class='line'>pg_ctlcluster 9.4 main start</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>(optioanl) Remove the old packages</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dpkg -l | grep postgresql
+</span><span class='line'>apt-get remove postgresql-9.3 postgresql-client-9.3 postgresql-contrib-9.3</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Analyze and drop old</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo su  postgres
+</span><span class='line'>/tmp/analyze_new_cluster.sh
+</span><span class='line'>or /usr/lib/postgresql/9.4/bin/vacuumdb -dbluevine -Upostgres -h127.0.0.1 
+</span><span class='line'>/tmp/delete_old_cluster.sh</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>On slave:</h3>
+
+<p>backup configs:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir ~/pg_config_backup
+</span><span class='line'>sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Install 9.4 packages and create the new cluster:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install postgresql-9.4 postgresql-contrib-9.4 postgresql-client-9.4 postgresql-9.4-pgespresso postgresql-server-dev-9.4
+</span><span class='line'>pg_dropcluster 9.4 main --stop
+</span><span class='line'>mkdir  /data/postgresql/9.4/main
+</span><span class='line'>sudo chown -R  postgres.postgres /data/postgresql
+</span><span class='line'>cd /etc/postgresql
+</span><span class='line'>rm -rf 9.4
+</span><span class='line'>cp -R 9.3/ 9.4</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>On master:</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>psql -U postgres -c "select pg_start_backup('clone',true)"
+</span><span class='line'>rsync -av --exclude pg_xlog --exclude postgresql.conf --exclude postgresql.pid \ 
+</span><span class='line'>     /data/postgresql/9.4/*  $SLAVE_HOST:/data/postgresql/9.4/
+</span><span class='line'>psql -U postgres -c "select pg_stop_backup()"
+</span><span class='line'>rsync -av /data/postgresql/9.4/main/pg_xlog $SLAVE_HOST:/data/postgresql/9.4/main/</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>ON slave:</h3>
+
+<p>recovery.conf in /data/postgres/9.4/main should look like this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>standby_mode = 'on'
+</span><span class='line'>primary_conninfo = 'host=$MASTER_HOST port=5432 user=replicator password=bvmyreplpasserfvgty sslmode=require'
+</span><span class='line'>trigger_file = '/tmp/postgresql.trigger'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>sudo service postgresql start</p>
 
 <h3>On master:</h3>
 
