@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Replication | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/replication/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-01T12:06:12+02:00</updated>
+  <updated>2015-11-01T12:07:13+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -174,7 +174,7 @@ psql -U postgres -c "select pg_stop_backup()"
 rsync -av /data/postgresql/9.4/main/pg_xlog $SLAVE_HOST:/data/postgresql/9.4/main/
 </code></pre>
 
-<h3>ON slave:</h3>
+<h3>On slave:</h3>
 
 <p>recovery.conf in /data/postgres/9.4/main should look like this:
 <code>
