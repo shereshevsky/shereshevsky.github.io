@@ -4,7 +4,7 @@
   <title><![CDATA[Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-02T15:17:43+02:00</updated>
+  <updated>2015-11-02T15:20:20+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Install BaRman on PostgreSQL 9.4 Slave Server]]></title>
-    <link href="http://dbcaptain.com/blog/2015/11/01/Insatll%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/"/>
+    <link href="http://dbcaptain.com/blog/2015/11/01/Install%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/"/>
     <updated>2015-11-01T12:43:15+02:00</updated>
-    <id>http://dbcaptain.com/blog/2015/11/01/Insatll BaRman on PostgreSQL 9.4 Slave server</id>
+    <id>http://dbcaptain.com/blog/2015/11/01/Install BaRman on PostgreSQL 9.4 Slave server</id>
     <content type="html"><![CDATA[<p>BaRman - Setup fail tolerant PostgreSQL with BaRman.</p>
 
 <p>Desired Setup</p>
