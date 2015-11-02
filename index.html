@@ -80,7 +80,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/11/01/Insatll%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/">Insatll Barman on Postgresql 9.4 Slave Server</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/11/01/Insatll%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/">Install BaRman on PostgreSQL 9.4 Slave Server</a></h1>
     
     
       <p class="meta">
@@ -89,7 +89,7 @@
 
 
 
-<time class='entry-date' datetime='2015-11-01T00:00:00+02:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2015</span></span> <span class='time'>12:00 am</span></time>
+<time class='entry-date' datetime='2015-11-01T12:43:15+02:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2015</span></span> <span class='time'>12:43 pm</span></time>
         
       </p>
     
@@ -113,7 +113,8 @@
 </span><span class='line'>| Master     | =======================&gt;  | Slave and  |
 </span><span class='line'>|            |       Log Shipping        | BaRman     |
 </span><span class='line'>|            |                           |            |
-</span><span class='line'>--------------                           --------------</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>--------------                           --------------
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>I&rsquo;m not covering PostgreSQL replication setup in this document.
@@ -133,9 +134,12 @@ enabling stop and start backup mode with  pgespresso_start_backup and pgespresso
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -c | awk '{print $2}'`-pgdg main" &gt; /etc/apt/sources.list.d/pgdg.list
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -c | \
+</span><span class='line'>awk '{print $2}'`-pgdg main" &gt; /etc/apt/sources.list.d/pgdg.list
 </span><span class='line'>apt-get update
-</span><span class='line'>apt-get install -y barman</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>apt-get install -y barman
+</span></code></pre></td></tr></table></div></figure>
 
 
 <h2>Install pgespresso</h2>
@@ -143,7 +147,10 @@ enabling stop and start backup mode with  pgespresso_start_backup and pgespresso
 <p>Both on Slave and Master servers:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install postgresql-9.4-pgespresso</span></code></pre></td></tr></table></div></figure>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>
+</span><span class='line'>sudo apt-get install postgresql-9.4-pgespresso
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>on master:</p>
@@ -151,7 +158,8 @@ enabling stop and start backup mode with  pgespresso_start_backup and pgespresso
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo su postgres
-</span><span class='line'>psql -c "create extension pgespresso"</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>psql -c "create extension pgespresso"
+</span></code></pre></td></tr></table></div></figure>
 
 
 <h2>SSH keys exchange</h2>
@@ -171,7 +179,8 @@ so we will generate new ssh key on Master and add it to Slave server:</p>
 </span><span class='line'>ssh-keygen -t rsa -b 4096
 </span><span class='line'>cd ~/.ssh
 </span><span class='line'>cat id_rsa.pub &gt;&gt; authorized_keys
-</span><span class='line'>chmod 600 ~/.ssh/authorized_keys</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>chmod 600 ~/.ssh/authorized_keys
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>you can use the defaults, enter, enter, enter
@@ -188,7 +197,8 @@ Copy content of id_rsa.pub.</p>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo su barman
 </span><span class='line'>cd ~
 </span><span class='line'>mkdit .ssh
-</span><span class='line'>cat &gt; ~/.ssh/authorized_keys</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>cat &gt; ~/.ssh/authorized_keys
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>paste content of id_rsa.pub</p>
@@ -206,7 +216,8 @@ Copy content of id_rsa.pub.</p>
 </span><span class='line'>^D
 </span><span class='line'>chmod 700 ~/.ssh
 </span><span class='line'>chmod 600 ~/.ssh/authorized_keys
-</span><span class='line'>chmod 600 ~/.ssh/id_rsa</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>chmod 600 ~/.ssh/id_rsa
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Now testing from Master:</p>
@@ -214,7 +225,8 @@ Copy content of id_rsa.pub.</p>
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo su postgres
-</span><span class='line'>ssh barman@159.203.143.214</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>ssh barman@159.203.143.214
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>answer yes and if you see something like this:</p>
@@ -222,7 +234,8 @@ Copy content of id_rsa.pub.</p>
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>Last login: Mon Nov  2 04:47:01 2015 from 10.13.1.2
-</span><span class='line'>barman@barman:~$</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>barman@barman:~$
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>you are fine.
@@ -231,7 +244,8 @@ ssh connection from barman user to postgres user should work as well
 (it will be used for file level backups):</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>barman@barman:~$ ssh postgres@$SLAVE_HOST</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>barman@barman:~$ ssh postgres@$SLAVE_HOST
+</span></code></pre></td></tr></table></div></figure>
 
 
 <h3>WAL shipment</h3>
@@ -241,7 +255,8 @@ ssh connection from barman user to postgres user should work as well
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo mkdir -p /data/barman/oper/incoming
-</span><span class='line'>sudo chown -R barman.barman /data/barman</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>sudo chown -R barman.barman /data/barman
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>On Master enable archiving mode and add archive command in postgresql.conf</p>
@@ -251,20 +266,23 @@ ssh connection from barman user to postgres user should work as well
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>echo "archive_mode = on
 </span><span class='line'>archive_command = 'rsync -a %p barman@10.10.10.10:/data/barman/oper/incoming/%f'
-</span><span class='line'>wal_level = hot_standby" &gt;&gt; /etc/postgresql/9.4/main/postgresql.conf</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>wal_level = hot_standby" &gt;&gt; /etc/postgresql/9.4/main/postgresql.conf
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>when 10.10.10.10 is the slave/barman server IP.
 Restarting PostgreSQL to use new config:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>service postgresql restart</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>service postgresql restart
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>test:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>psql -Upostgres -c"select i into test from generate_series(1, 100000) i"</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>psql -Upostgres -c"select i into test from generate_series(1, 100000) i"
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>go to slave/barman server and check you have data in /data/barman/oper/incoming folder.</p>
@@ -304,7 +322,8 @@ Restarting PostgreSQL to use new config:</p>
 </span><span class='line'>description =  "Operational PostgreSQL Database Hot Standby"
 </span><span class='line'>ssh_command = ssh postgres@10.0.0.1
 </span><span class='line'>conninfo = host=10.0.0.1 user=postgres pasword=strong_password
-</span><span class='line'>minimum_redundancy = 1</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>minimum_redundancy = 1
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>when 10.0.0.1 - Slave host address and oper - logical database name you will use
@@ -363,6 +382,7 @@ with barman commands.</p>
 <span class='line-number'>47</span>
 <span class='line-number'>48</span>
 <span class='line-number'>49</span>
+<span class='line-number'>50</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>root@barman:~# sudo su barman
 </span><span class='line'>barman@barman:/data/barman/oper/incoming$ barman list-server
 </span><span class='line'>oper - Operational PostgreSQL Database Hot Standby
@@ -412,8 +432,12 @@ with barman commands.</p>
 </span><span class='line'>  First available backup: 20151102T072711
 </span><span class='line'>  Last available backup: 20151102T072711
 </span><span class='line'>  Minimum redundancy requirements: satisfied (1/1)
+</span><span class='line'>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<p><a href="https://github.com/2ndquadrant-it/pgespresso">https://github.com/2ndquadrant-it/pgespresso</a>
+<a href="http://docs.pgbarman.org/release/1.5.0/#installation">http://docs.pgbarman.org/release/1.5.0/#installation</a></p>
 </div>
   
   
@@ -453,8 +477,9 @@ backup config:</p>
 </span><span class='line'>sudo cp /etc/postgresql/9.3/main/* ~/pg_config_backup</span></code></pre></td></tr></table></div></figure>
 
 
-<p>  <br/>
-add extra package if missing:</p>
+<p></p>
+
+<p>add extra package if missing:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -758,24 +783,22 @@ I&rsquo;m going to use current stable versions:</p>
 Reference for Postgres/PostGIS installation using PostgreSQL installation guides wiki article and Official Ubuntu Community Wiki.
 This one was good too.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main&quot;</span> &gt; /etc/apt/sources.list.d/postgresql.list
-</span><span class='line'><span class="nv">$ </span>wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc <span class="p">|</span> sudo apt-key add -
-</span><span class='line'><span class="nv">$ </span>sudo apt-get update
-</span><span class='line'><span class="nv">$ </span>sudo apt-get upgrade
-</span><span class='line'><span class="nv">$ </span>sudo apt-get install postgresql-9.3 postgresql-9.3-postgis-2.1 postgresql-contrib-9.3
-</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" &gt; /etc/apt/sources.list.d/postgresql.list
+</span><span class='line'>$ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+</span><span class='line'>$ sudo apt-get update
+</span><span class='line'>$ sudo apt-get upgrade
+</span><span class='line'>$ sudo apt-get install postgresql-9.3 postgresql-9.3-postgis-2.1 postgresql-contrib-9.3</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Edit pg_hba.config for postgres to connect locally.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo vi /etc/postgresql/9.3/main/pg_hba.conf
-</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo vi /etc/postgresql/9.3/main/pg_hba.conf</span></code></pre></td></tr></table></div></figure>
 
 
 <p>First not commented line will be like this (change peer to trust):
@@ -783,38 +806,35 @@ local all postgres trust</p>
 
 <p>Restart postgresql service:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo service postgresql restart
-</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo service postgresql restart</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Now check you are able to connect to postgres (default) database:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>psql -U postgres
-</span><span class='line'>psql <span class="o">(</span>9.3.4<span class="o">)</span>
-</span><span class='line'>Type <span class="s2">&quot;help&quot;</span> <span class="k">for</span> help.
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ psql -U postgres
+</span><span class='line'>psql (9.3.4)
+</span><span class='line'>Type "help" for help.
 </span><span class='line'>
-</span><span class='line'><span class="nv">postgres</span><span class="o">=</span><span class="c">#</span>
-</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>postgres=#</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Create new database to store OSM data:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">postgres</span><span class="o">=</span><span class="c"># create database osm;</span>
-</span><span class='line'>CREATE DATABASE
-</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>postgres=# create database osm;
+</span><span class='line'>CREATE DATABASE</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Connect to created database and add PostGIS and H-store extensions:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -822,51 +842,47 @@ local all postgres trust</p>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>psql -U postgres -d osm
-</span><span class='line'>psql <span class="o">(</span>9.3.4<span class="o">)</span>
-</span><span class='line'>Type <span class="s2">&quot;help&quot;</span> <span class="k">for</span> help.
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ psql -U postgres -d osm
+</span><span class='line'>psql (9.3.4)
+</span><span class='line'>Type "help" for help.
 </span><span class='line'>
-</span><span class='line'><span class="nv">osm</span><span class="o">=</span><span class="c"># create extension postgis;</span>
+</span><span class='line'>osm=# create extension postgis;
 </span><span class='line'>CREATE EXTENSION
-</span><span class='line'><span class="nv">osm</span><span class="o">=</span><span class="c"># create extension hstore;</span>
-</span><span class='line'>CREATE EXTENSION
-</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>osm=# create extension hstore;
+</span><span class='line'>CREATE EXTENSION</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Now we have the database we will use to load OSM data later.</p>
 
 <p>Now let&rsquo;s compile osm2pgsql:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo apt-get install build-essential libxml2-dev libgeos++-dev libpq-dev libbz2-dev proj libtool automake git lua5.2 liblua5.2-0 liblua5.2-dev liblua5.1-0 libprotobuf-c0-dev protobuf-c-compiler
-</span><span class='line'><span class="nv">$ </span>wget https://github.com/openstreetmap/osm2pgsql/archive/0.84.0.zip
-</span><span class='line'><span class="nv">$ </span>unzip 0.84.0.zip
-</span><span class='line'><span class="nv">$ </span>rm 0.84.0.zip
-</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>osm2pgsql-0.84.0
-</span><span class='line'><span class="nv">$ </span>./autogen.sh <span class="o">&amp;&amp;</span> ./configure <span class="o">&amp;&amp;</span> make
-</span><span class='line'><span class="nv">$ </span>sudo make install
-</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo apt-get install build-essential libxml2-dev libgeos++-dev libpq-dev libbz2-dev proj libtool automake git lua5.2 liblua5.2-0 liblua5.2-dev liblua5.1-0 libprotobuf-c0-dev protobuf-c-compiler
+</span><span class='line'>$ wget https://github.com/openstreetmap/osm2pgsql/archive/0.84.0.zip
+</span><span class='line'>$ unzip 0.84.0.zip
+</span><span class='line'>$ rm 0.84.0.zip
+</span><span class='line'>$ cd osm2pgsql-0.84.0
+</span><span class='line'>$ ./autogen.sh && ./configure && make
+</span><span class='line'>$ sudo make install</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Now let&rsquo;s download osm file we will use for import.
 Here you can find different mirrors.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>wget http://download.geofabrik.de/north-america/us-northeast-latest.osm.bz2
-</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://download.geofabrik.de/north-america/us-northeast-latest.osm.bz2</span></code></pre></td></tr></table></div></figure>
 
 
 <p>And run osm2pgsql:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>bunzip2 -c us-northeast-latest.osm.bz2 <span class="p">|</span> /usr/local/bin/osm2pgsql --slim -E <span class="m">4326</span> -d osm -C <span class="m">1500</span> -S /usr/share/osm2pgsql/default.style -U postgres --hstore /dev/stdin
-</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>bunzip2 -c us-northeast-latest.osm.bz2 | /usr/local/bin/osm2pgsql --slim -E 4326 -d osm -C 1500 -S /usr/share/osm2pgsql/default.style -U postgres --hstore /dev/stdin</span></code></pre></td></tr></table></div></figure>
 
 
 <p>And waiting &hellip;</p>
@@ -890,7 +906,7 @@ Here you can find different mirrors.</p>
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/11/01/Insatll%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/">Insatll Barman on Postgresql 9.4 Slave Server</a>
+        <a href="/blog/2015/11/01/Insatll%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/">Install BaRman on PostgreSQL 9.4 Slave Server</a>
       </li>
     
       <li class="post">

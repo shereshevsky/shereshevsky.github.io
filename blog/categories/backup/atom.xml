@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Backup | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/backup/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-02T14:57:21+02:00</updated>
+  <updated>2015-11-02T15:17:43+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Install BaRman on PostgreSQL 9.4 Slave Server]]></title>
-    <link href="http://dbcaptain.com/blog/2015/10/30/Insatll%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/"/>
-    <updated>2015-10-30T16:43:15+02:00</updated>
-    <id>http://dbcaptain.com/blog/2015/10/30/Insatll BaRman on PostgreSQL 9.4 Slave server</id>
+    <link href="http://dbcaptain.com/blog/2015/11/01/Insatll%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/"/>
+    <updated>2015-11-01T12:43:15+02:00</updated>
+    <id>http://dbcaptain.com/blog/2015/11/01/Insatll BaRman on PostgreSQL 9.4 Slave server</id>
     <content type="html"><![CDATA[<p>BaRman - Setup fail tolerant PostgreSQL with BaRman.</p>
 
 <p>Desired Setup
@@ -48,106 +48,126 @@ So main points I want to achive:
 Install barman package (will automatically check for Ubuntu version and use appropriate repository:
 </code></pre>
 
-<p>echo &ldquo;deb <a href="http://apt.postgresql.org/pub/repos/apt/">http://apt.postgresql.org/pub/repos/apt/</a> <code>lsb_release -c | awk '{print $2}'</code>-pgdg main&rdquo; > /etc/apt/sources.list.d/pgdg.list
+<p>echo &ldquo;deb <a href="http://apt.postgresql.org/pub/repos/apt/">http://apt.postgresql.org/pub/repos/apt/</a> <code>lsb_release -c | \
+awk '{print $2}'</code>-pgdg main&rdquo; > /etc/apt/sources.list.d/pgdg.list
 apt-get update
-apt-get install -y barman
-```</p>
+apt-get install -y barman</p>
 
-<h2>Install pgespresso</h2>
+<pre><code>
+## Install pgespresso
+Both on Slave and Master servers:
+</code></pre>
 
-<p>Both on Slave and Master servers:
-<code>
-sudo apt-get install postgresql-9.4-pgespresso
-</code>
+<p>sudo apt-get install postgresql-9.4-pgespresso</p>
+
+<pre><code>
 on master:
-<code>
-sudo su postgres
-psql -c "create extension pgespresso"
-</code></p>
+</code></pre>
 
-<h2>SSH keys exchange</h2>
+<p>sudo su postgres
+psql -c &ldquo;create extension pgespresso&rdquo;</p>
 
-<p>Setup access with SSH key from Master to Slave with baman user.
+<pre><code>
+## SSH keys exchange
+Setup access with SSH key from Master to Slave with baman user.
 postgres user on Master server should be able to send WAL files to barman user on Slave server,
-so we will generate new ssh key on Master and add it to Slave server:</p>
+so we will generate new ssh key on Master and add it to Slave server:
 
-<p>On Master:
-<code>
-sudo su postgres
+On Master:
+</code></pre>
+
+<p>sudo su postgres
 ssh-keygen -t rsa -b 4096
 cd ~/.ssh
-cat id_rsa.pub &gt;&gt; authorized_keys
-chmod 600 ~/.ssh/authorized_keys
-</code>
+cat id_rsa.pub >> authorized_keys
+chmod 600 ~/.ssh/authorized_keys</p>
+
+<pre><code>
 you can use the defaults, enter, enter, enter
 Now you have two files in /var/lib/postgresql/.ssh - id_rsa and id_rsa.pub.
 The public key should be added to authorized_keys file on Slave server.
-Copy content of id_rsa.pub.</p>
+Copy content of id_rsa.pub.
 
-<p>On Slave:
-<code>
-sudo su barman
+On Slave:
+</code></pre>
+
+<p>sudo su barman
 cd ~
 mkdit .ssh
-cat &gt; ~/.ssh/authorized_keys
-</code>
+cat > ~/.ssh/authorized_keys</p>
+
+<pre><code>
 paste content of id_rsa.pub
-<code>
-^D
-cat &gt; ~/.ssh/id_rsa
+</code></pre>
+
+<p>^D
+cat > ~/.ssh/id_rsa
 paste content of id_rs
 ^D
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/id_rsa
-</code>
+chmod 600 ~/.ssh/id_rsa</p>
+
+<pre><code>
 Now testing from Master:
-<code>
-sudo su postgres
-ssh barman@159.203.143.214
-</code>
+</code></pre>
+
+<p>sudo su postgres
+ssh <a href="&#x6d;&#97;&#105;&#108;&#116;&#111;&#x3a;&#98;&#x61;&#114;&#x6d;&#97;&#x6e;&#x40;&#49;&#x35;&#x39;&#x2e;&#x32;&#48;&#x33;&#46;&#49;&#x34;&#51;&#x2e;&#50;&#49;&#52;">&#98;&#x61;&#x72;&#109;&#x61;&#x6e;&#64;&#49;&#x35;&#57;&#x2e;&#x32;&#x30;&#x33;&#46;&#x31;&#52;&#x33;&#46;&#x32;&#49;&#52;</a></p>
+
+<pre><code>
 answer yes and if you see something like this:
-<code>
-Last login: Mon Nov  2 04:47:01 2015 from 10.13.1.2
-barman@barman:~$
-</code>
+</code></pre>
+
+<p>Last login: Mon Nov  2 04:47:01 2015 from 10.13.1.2
+barman@barman:~$</p>
+
+<pre><code>
 you are fine.
 Your barman user should be able to connect to postgres user
 ssh connection from barman user to postgres user should work as well
 (it will be used for file level backups):
-<code>
-barman@barman:~$ ssh postgres@$SLAVE_HOST
-</code></p>
+</code></pre>
 
-<h3>WAL shipment</h3>
+<p>barman@barman:~$ ssh postgres@$SLAVE_HOST</p>
 
-<p>On Slave create folder for incoming WAL files:
-<code>
-sudo mkdir -p /data/barman/oper/incoming
-sudo chown -R barman.barman /data/barman
-</code>
+<pre><code>
+### WAL shipment
+On Slave create folder for incoming WAL files:
+</code></pre>
+
+<p>sudo mkdir -p /data/barman/oper/incoming
+sudo chown -R barman.barman /data/barman</p>
+
+<pre><code>
 On Master enable archiving mode and add archive command in postgresql.conf
-<code>
-echo "archive_mode = on
-archive_command = 'rsync -a %p barman@10.10.10.10:/data/barman/oper/incoming/%f'
-wal_level = hot_standby" &gt;&gt; /etc/postgresql/9.4/main/postgresql.conf
-</code>
+</code></pre>
+
+<p>echo &ldquo;archive_mode = on
+archive_command = &lsquo;rsync -a %p barman@10.10.10.10:/data/barman/oper/incoming/%f&rsquo;
+wal_level = hot_standby&rdquo; >> /etc/postgresql/9.4/main/postgresql.conf</p>
+
+<pre><code>
 when 10.10.10.10 is the slave/barman server IP.
 Restarting PostgreSQL to use new config:
-<code>
-service postgresql restart
-</code>
+</code></pre>
+
+<p>service postgresql restart</p>
+
+<pre><code>
 test:
-<code>
-psql -Upostgres -c"select i into test from generate_series(1, 100000) i"
-</code>
-go to slave/barman server and check you have data in /data/barman/oper/incoming folder.</p>
+</code></pre>
 
-<h2>BaRman config</h2>
+<p>psql -Upostgres -c"select i into test from generate_series(1, 100000) i"</p>
 
-<p>Your barman config can be lake that:</p>
+<pre><code>
+go to slave/barman server and check you have data in /data/barman/oper/incoming folder.
 
-<pre><code>[barman]
+## BaRman config
+Your barman config can be lake that:
+</code></pre>
+
+<p>[barman]
 barman_home = /data/barman
 barman_user = barman
 log_file = /var/log/barman/barman.log
@@ -159,20 +179,20 @@ network_compression = true
 backup_options = concurrent_backup
 last_backup_maximum_age = 1 DAY
 [oper]
-description =  "Operational PostgreSQL Database Hot Standby"
-ssh_command = ssh postgres@10.0.0.1
+description =  &ldquo;Operational PostgreSQL Database Hot Standby&rdquo;
+ssh_command = ssh <a href="&#109;&#97;&#105;&#x6c;&#x74;&#x6f;&#58;&#x70;&#x6f;&#115;&#116;&#103;&#x72;&#101;&#115;&#x40;&#49;&#x30;&#46;&#x30;&#46;&#x30;&#x2e;&#49;">&#112;&#x6f;&#x73;&#116;&#103;&#x72;&#101;&#115;&#64;&#49;&#48;&#x2e;&#x30;&#46;&#48;&#46;&#49;</a>
 conninfo = host=10.0.0.1 user=postgres pasword=strong_password
-minimum_redundancy = 1
+minimum_redundancy = 1</p>
+
+<pre><code>
+when 10.0.0.1 - Slave host address and oper - logical database name you will use
+with barman commands.
+
+## BaRman Operations
+On slave:
 </code></pre>
 
-<p>when 10.0.0.1 - Slave host address and oper - logical database name you will use
-with barman commands.</p>
-
-<h2>BaRman Operations</h2>
-
-<p>On slave:
-```
-root@barman:~# sudo su barman
+<p>root@barman:~# sudo su barman
 barman@barman:/data/barman/oper/incoming$ barman list-server
 oper - Operational PostgreSQL Database Hot Standby</p>
 
@@ -223,6 +243,9 @@ Server oper:
     Minimum redundancy requirements: satisfied (1/1)</p>
 
 <p>```</p>
+
+<p><a href="https://github.com/2ndquadrant-it/pgespresso">https://github.com/2ndquadrant-it/pgespresso</a>
+<a href="http://docs.pgbarman.org/release/1.5.0/#installation">http://docs.pgbarman.org/release/1.5.0/#installation</a></p>
 ]]></content>
   </entry>
   

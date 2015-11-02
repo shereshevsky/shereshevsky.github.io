@@ -101,24 +101,22 @@ I&rsquo;m going to use current stable versions:</p>
 Reference for Postgres/PostGIS installation using PostgreSQL installation guides wiki article and Official Ubuntu Community Wiki.
 This one was good too.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main&quot;</span> &gt; /etc/apt/sources.list.d/postgresql.list
-</span><span class='line'><span class="nv">$ </span>wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc <span class="p">|</span> sudo apt-key add -
-</span><span class='line'><span class="nv">$ </span>sudo apt-get update
-</span><span class='line'><span class="nv">$ </span>sudo apt-get upgrade
-</span><span class='line'><span class="nv">$ </span>sudo apt-get install postgresql-9.3 postgresql-9.3-postgis-2.1 postgresql-contrib-9.3
-</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" &gt; /etc/apt/sources.list.d/postgresql.list
+</span><span class='line'>$ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+</span><span class='line'>$ sudo apt-get update
+</span><span class='line'>$ sudo apt-get upgrade
+</span><span class='line'>$ sudo apt-get install postgresql-9.3 postgresql-9.3-postgis-2.1 postgresql-contrib-9.3</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Edit pg_hba.config for postgres to connect locally.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo vi /etc/postgresql/9.3/main/pg_hba.conf
-</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo vi /etc/postgresql/9.3/main/pg_hba.conf</span></code></pre></td></tr></table></div></figure>
 
 
 <p>First not commented line will be like this (change peer to trust):
@@ -126,38 +124,35 @@ local all postgres trust</p>
 
 <p>Restart postgresql service:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo service postgresql restart
-</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo service postgresql restart</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Now check you are able to connect to postgres (default) database:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>psql -U postgres
-</span><span class='line'>psql <span class="o">(</span>9.3.4<span class="o">)</span>
-</span><span class='line'>Type <span class="s2">&quot;help&quot;</span> <span class="k">for</span> help.
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ psql -U postgres
+</span><span class='line'>psql (9.3.4)
+</span><span class='line'>Type "help" for help.
 </span><span class='line'>
-</span><span class='line'><span class="nv">postgres</span><span class="o">=</span><span class="c">#</span>
-</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>postgres=#</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Create new database to store OSM data:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">postgres</span><span class="o">=</span><span class="c"># create database osm;</span>
-</span><span class='line'>CREATE DATABASE
-</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>postgres=# create database osm;
+</span><span class='line'>CREATE DATABASE</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Connect to created database and add PostGIS and H-store extensions:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -165,51 +160,47 @@ local all postgres trust</p>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>psql -U postgres -d osm
-</span><span class='line'>psql <span class="o">(</span>9.3.4<span class="o">)</span>
-</span><span class='line'>Type <span class="s2">&quot;help&quot;</span> <span class="k">for</span> help.
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ psql -U postgres -d osm
+</span><span class='line'>psql (9.3.4)
+</span><span class='line'>Type "help" for help.
 </span><span class='line'>
-</span><span class='line'><span class="nv">osm</span><span class="o">=</span><span class="c"># create extension postgis;</span>
+</span><span class='line'>osm=# create extension postgis;
 </span><span class='line'>CREATE EXTENSION
-</span><span class='line'><span class="nv">osm</span><span class="o">=</span><span class="c"># create extension hstore;</span>
-</span><span class='line'>CREATE EXTENSION
-</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>osm=# create extension hstore;
+</span><span class='line'>CREATE EXTENSION</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Now we have the database we will use to load OSM data later.</p>
 
 <p>Now let&rsquo;s compile osm2pgsql:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo apt-get install build-essential libxml2-dev libgeos++-dev libpq-dev libbz2-dev proj libtool automake git lua5.2 liblua5.2-0 liblua5.2-dev liblua5.1-0 libprotobuf-c0-dev protobuf-c-compiler
-</span><span class='line'><span class="nv">$ </span>wget https://github.com/openstreetmap/osm2pgsql/archive/0.84.0.zip
-</span><span class='line'><span class="nv">$ </span>unzip 0.84.0.zip
-</span><span class='line'><span class="nv">$ </span>rm 0.84.0.zip
-</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>osm2pgsql-0.84.0
-</span><span class='line'><span class="nv">$ </span>./autogen.sh <span class="o">&amp;&amp;</span> ./configure <span class="o">&amp;&amp;</span> make
-</span><span class='line'><span class="nv">$ </span>sudo make install
-</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo apt-get install build-essential libxml2-dev libgeos++-dev libpq-dev libbz2-dev proj libtool automake git lua5.2 liblua5.2-0 liblua5.2-dev liblua5.1-0 libprotobuf-c0-dev protobuf-c-compiler
+</span><span class='line'>$ wget https://github.com/openstreetmap/osm2pgsql/archive/0.84.0.zip
+</span><span class='line'>$ unzip 0.84.0.zip
+</span><span class='line'>$ rm 0.84.0.zip
+</span><span class='line'>$ cd osm2pgsql-0.84.0
+</span><span class='line'>$ ./autogen.sh && ./configure && make
+</span><span class='line'>$ sudo make install</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Now let&rsquo;s download osm file we will use for import.
 Here you can find different mirrors.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>wget http://download.geofabrik.de/north-america/us-northeast-latest.osm.bz2
-</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://download.geofabrik.de/north-america/us-northeast-latest.osm.bz2</span></code></pre></td></tr></table></div></figure>
 
 
 <p>And run osm2pgsql:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>bunzip2 -c us-northeast-latest.osm.bz2 <span class="p">|</span> /usr/local/bin/osm2pgsql --slim -E <span class="m">4326</span> -d osm -C <span class="m">1500</span> -S /usr/share/osm2pgsql/default.style -U postgres --hstore /dev/stdin
-</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>bunzip2 -c us-northeast-latest.osm.bz2 | /usr/local/bin/osm2pgsql --slim -E 4326 -d osm -C 1500 -S /usr/share/osm2pgsql/default.style -U postgres --hstore /dev/stdin</span></code></pre></td></tr></table></div></figure>
 
 
 <p>And waiting &hellip;</p>
@@ -273,7 +264,7 @@ Here you can find different mirrors.</p>
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/11/01/Insatll%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/">Insatll Barman on Postgresql 9.4 Slave Server</a>
+        <a href="/blog/2015/11/01/Insatll%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/">Install BaRman on PostgreSQL 9.4 Slave Server</a>
       </li>
     
       <li class="post">
