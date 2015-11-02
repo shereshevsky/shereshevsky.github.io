@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Data Load | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/data-load/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-02T14:53:22+02:00</updated>
+  <updated>2015-11-02T14:57:21+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -69,23 +69,16 @@ CREATE DATABASE
 </code></pre>
 
 <p>Connect to created database and add PostGIS and H-store extensions:
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>psql -U postgres -d osm
-</span><span class='line'>psql <span class="o">(</span>9.3.4<span class="o">)</span>
-</span><span class='line'>Type <span class="p">&amp;</span>ldquo<span class="p">;</span><span class="nb">help</span><span class="p">&amp;</span>rdquo<span class="p">;</span> <span class="k">for</span> help.&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;osm<span class="o">=</span><span class="c"># create extension postgis;</span>
-</span><span class='line'>CREATE EXTENSION
-</span><span class='line'><span class="nv">osm</span><span class="o">=</span><span class="c"># create extension hstore;</span>
-</span><span class='line'>CREATE EXTENSION
-</span></code></pre></td></tr></table></div></figure>
+```sh
+$ psql -U postgres -d osm
+psql (9.3.4)
+Type &ldquo;help&rdquo; for help.</p>
+
+<p>osm=# create extension postgis;
+CREATE EXTENSION
+osm=# create extension hstore;
+CREATE EXTENSION
+```
 Now we have the database we will use to load OSM data later.</p>
 
 <p>Now let&rsquo;s compile osm2pgsql:</p>

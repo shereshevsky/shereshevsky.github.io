@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 9.4 | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/9-dot-4/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-02T14:53:22+02:00</updated>
+  <updated>2015-11-02T14:57:21+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -198,6 +198,219 @@ check logs on all the servers</p>
 <a href="http://www.postgresql.org/docs/9.4/static/pgupgrade.html">http://www.postgresql.org/docs/9.4/static/pgupgrade.html</a>
 <a href="https://wiki.postgresql.org/wiki/Using_pg_upgrade_on_Ubuntu/Debian">https://wiki.postgresql.org/wiki/Using_pg_upgrade_on_Ubuntu/Debian</a>
 <a href="https://wiki.postgresql.org/wiki/Binary_Replication_Tutorial">https://wiki.postgresql.org/wiki/Binary_Replication_Tutorial</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Install BaRman on PostgreSQL 9.4 Slave Server]]></title>
+    <link href="http://dbcaptain.com/blog/2015/10/30/Insatll%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/"/>
+    <updated>2015-10-30T16:43:15+02:00</updated>
+    <id>http://dbcaptain.com/blog/2015/10/30/Insatll BaRman on PostgreSQL 9.4 Slave server</id>
+    <content type="html"><![CDATA[<p>BaRman - Setup fail tolerant PostgreSQL with BaRman.</p>
+
+<p>Desired Setup
+```</p>
+
+<hr />
+
+<p>|            |                           |            |
+| PostgreSQL |   Streaming Replication   | PostgreSQL |
+| Master     | =======================>  | Slave and  |
+|            |       Log Shipping        | BaRman     |
+|            |                           |            |</p>
+
+<hr />
+
+<pre><code>
+I'm not covering PostgreSQL replication setup in this document.
+The only setup specific point - we will take backup from Slave server, not Master.
+This way we will reduce network trafic and load from our PostgreSQL Master server.
+To achive it we will use pgespresso extension (https://github.com/2ndquadrant-it/pgespresso),
+enabling stop and start backup mode with  pgespresso_start_backup and pgespresso_stop_backup on Slave server.
+
+So main points I want to achive:
+1. WAL shipment to Slave server.
+2. Full DB backup from Slave server.
+
+## Install BaRman
+Install barman package (will automatically check for Ubuntu version and use appropriate repository:
+</code></pre>
+
+<p>echo &ldquo;deb <a href="http://apt.postgresql.org/pub/repos/apt/">http://apt.postgresql.org/pub/repos/apt/</a> <code>lsb_release -c | awk '{print $2}'</code>-pgdg main&rdquo; > /etc/apt/sources.list.d/pgdg.list
+apt-get update
+apt-get install -y barman
+```</p>
+
+<h2>Install pgespresso</h2>
+
+<p>Both on Slave and Master servers:
+<code>
+sudo apt-get install postgresql-9.4-pgespresso
+</code>
+on master:
+<code>
+sudo su postgres
+psql -c "create extension pgespresso"
+</code></p>
+
+<h2>SSH keys exchange</h2>
+
+<p>Setup access with SSH key from Master to Slave with baman user.
+postgres user on Master server should be able to send WAL files to barman user on Slave server,
+so we will generate new ssh key on Master and add it to Slave server:</p>
+
+<p>On Master:
+<code>
+sudo su postgres
+ssh-keygen -t rsa -b 4096
+cd ~/.ssh
+cat id_rsa.pub &gt;&gt; authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+</code>
+you can use the defaults, enter, enter, enter
+Now you have two files in /var/lib/postgresql/.ssh - id_rsa and id_rsa.pub.
+The public key should be added to authorized_keys file on Slave server.
+Copy content of id_rsa.pub.</p>
+
+<p>On Slave:
+<code>
+sudo su barman
+cd ~
+mkdit .ssh
+cat &gt; ~/.ssh/authorized_keys
+</code>
+paste content of id_rsa.pub
+<code>
+^D
+cat &gt; ~/.ssh/id_rsa
+paste content of id_rs
+^D
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/id_rsa
+</code>
+Now testing from Master:
+<code>
+sudo su postgres
+ssh barman@159.203.143.214
+</code>
+answer yes and if you see something like this:
+<code>
+Last login: Mon Nov  2 04:47:01 2015 from 10.13.1.2
+barman@barman:~$
+</code>
+you are fine.
+Your barman user should be able to connect to postgres user
+ssh connection from barman user to postgres user should work as well
+(it will be used for file level backups):
+<code>
+barman@barman:~$ ssh postgres@$SLAVE_HOST
+</code></p>
+
+<h3>WAL shipment</h3>
+
+<p>On Slave create folder for incoming WAL files:
+<code>
+sudo mkdir -p /data/barman/oper/incoming
+sudo chown -R barman.barman /data/barman
+</code>
+On Master enable archiving mode and add archive command in postgresql.conf
+<code>
+echo "archive_mode = on
+archive_command = 'rsync -a %p barman@10.10.10.10:/data/barman/oper/incoming/%f'
+wal_level = hot_standby" &gt;&gt; /etc/postgresql/9.4/main/postgresql.conf
+</code>
+when 10.10.10.10 is the slave/barman server IP.
+Restarting PostgreSQL to use new config:
+<code>
+service postgresql restart
+</code>
+test:
+<code>
+psql -Upostgres -c"select i into test from generate_series(1, 100000) i"
+</code>
+go to slave/barman server and check you have data in /data/barman/oper/incoming folder.</p>
+
+<h2>BaRman config</h2>
+
+<p>Your barman config can be lake that:</p>
+
+<pre><code>[barman]
+barman_home = /data/barman
+barman_user = barman
+log_file = /var/log/barman/barman.log
+compression = gzip
+reuse_backup = link
+retention_policy = REDUNDANCY 4
+bandwidth_limit = 4000
+network_compression = true
+backup_options = concurrent_backup
+last_backup_maximum_age = 1 DAY
+[oper]
+description =  "Operational PostgreSQL Database Hot Standby"
+ssh_command = ssh postgres@10.0.0.1
+conninfo = host=10.0.0.1 user=postgres pasword=strong_password
+minimum_redundancy = 1
+</code></pre>
+
+<p>when 10.0.0.1 - Slave host address and oper - logical database name you will use
+with barman commands.</p>
+
+<h2>BaRman Operations</h2>
+
+<p>On slave:
+```
+root@barman:~# sudo su barman
+barman@barman:/data/barman/oper/incoming$ barman list-server
+oper - Operational PostgreSQL Database Hot Standby</p>
+
+<p>barman@barman:/data/barman/oper/incoming$ barman check oper
+Server oper:
+    PostgreSQL: OK
+    archive_mode: OK
+    wal_level: OK
+    archive_command: OK
+    continuous archiving: OK
+    directories: OK
+    retention policy settings: OK
+    backup maximum age: FAILED (interval provided: 1 day, latest backup age: No available backups)
+    compression settings: OK
+    minimum redundancy requirements: FAILED (have 0 backups, expected at least 1)
+    ssh: OK (PostgreSQL server)
+    pgespresso extension: OK</p>
+
+<p>barman@barman:/data/barman/oper/incoming$ barman backup oper
+Starting backup for server oper in /data/barman/oper/base/20151102T072711
+Backup start at xlog location: 0/E000028 (00000001000000000000000E, 00000028)
+Copying files.
+Copy done.
+Asking PostgreSQL server to finalize the backup.
+Backup size: 167.8 MiB. Actual size on disk: 167.8 MiB (-0.00% deduplication ratio).
+Backup end at xlog location: 0/F000000 (00000001000000000000000E, 00000000)
+Backup completed
+Processing xlog segments for oper
+  Older than first backup. Trashing file 00000001000000000000000D from server oper</p>
+
+<p>barman@barman:/data/barman/oper/incoming$ barman status oper
+Server oper:
+    Description: Operational PostgreSQL Database Hot Standby
+    Active: True
+    Disabled: False
+    PostgreSQL version: 9.4.5
+    pgespresso extension: Available
+    PostgreSQL Data directory: /var/lib/postgresql/9.4/main
+    PostgreSQL &lsquo;archive_command&rsquo; setting: rsync -a %p barman@159.203.143.214:/data/barman/oper/incoming/%f
+    Last archived WAL: 00000001000000000000000E.00000028.backup, at Mon Nov  2 07:27:31 2015
+    Current WAL segment: 00000001000000000000000F
+    Failures of WAL archiver: 0
+    Server WAL archiving rate: 0.00/hour
+    Retention policies: enforced (mode: auto, retention: REDUNDANCY 4, WAL retention: MAIN)
+    No. of available backups: 1
+    First available backup: 20151102T072711
+    Last available backup: 20151102T072711
+    Minimum redundancy requirements: satisfied (1/1)</p>
+
+<p>```</p>
 ]]></content>
   </entry>
   
