@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Master | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/master/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-02T15:20:20+02:00</updated>
+  <updated>2015-11-08T22:33:57+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -187,7 +187,7 @@ rsync -av /data/postgresql/9.4/main/pg_xlog $SLAVE_HOST:/data/postgresql/9.4/mai
 <p>recovery.conf in /data/postgres/9.4/main should look like this:</p>
 
 <pre><code>standby_mode = 'on'
-primary_conninfo = 'host=$MASTER_HOST port=5432 user=replicator password=bvmyreplpasserfvgty sslmode=require'
+primary_conninfo = 'host=$MASTER_HOST port=5432 user=replicator password=strong_password sslmode=require'
 trigger_file = '/tmp/postgresql.trigger'
 </code></pre>
 
