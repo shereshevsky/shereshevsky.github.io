@@ -4,7 +4,7 @@
   <title><![CDATA[Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-26T12:41:21+02:00</updated>
+  <updated>2015-11-26T12:41:58+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -157,8 +157,9 @@ with <code>shared_preload_libraries = 'pgaudit'</code></p>
 </span><span class='line'>-- 2015-11-26 12:27:34 IST CONTEXT:  SQL function "function1" statement 1</span></code></pre></td></tr></table></div></figure>
 
 
-<p>Some links:
-<a href="https://github.com/pgaudit/pgaudit/blob/master/README.md">https://github.com/pgaudit/pgaudit/blob/master/README.md</a>
+<p>Some links:</p>
+
+<p><a href="https://github.com/pgaudit/pgaudit/blob/master/README.md">https://github.com/pgaudit/pgaudit/blob/master/README.md</a>
 <a href="http://www.postgresql.org/message-id/5363390F.8040704@2ndquadrant.com">http://www.postgresql.org/message-id/5363390F.8040704@2ndquadrant.com</a>
 <a href="http://pgaudit.org/">http://pgaudit.org/</a></p>
 ]]></content>

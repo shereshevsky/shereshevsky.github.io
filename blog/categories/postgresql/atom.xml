@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Postgresql | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/postgresql/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-26T12:41:21+02:00</updated>
+  <updated>2015-11-26T12:41:58+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -152,8 +152,9 @@ and in serparate window:
 </span><span class='line'>&ndash; 2015-11-26 12:27:34 IST LOG:  AUDIT,2015-11-26 12:27:34.451274+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table1,select function1(8);
 </span><span class='line'>&ndash; 2015-11-26 12:27:34 IST CONTEXT:  SQL function &ldquo;function1&rdquo; statement 1</span></code></pre></td></tr></table></div></figure></p>
 
-<p>Some links:
-<a href="https://github.com/pgaudit/pgaudit/blob/master/README.md">https://github.com/pgaudit/pgaudit/blob/master/README.md</a>
+<p>Some links:</p>
+
+<p><a href="https://github.com/pgaudit/pgaudit/blob/master/README.md">https://github.com/pgaudit/pgaudit/blob/master/README.md</a>
 <a href="http://www.postgresql.org/message-id/5363390F.8040704@2ndquadrant.com">http://www.postgresql.org/message-id/5363390F.8040704@2ndquadrant.com</a>
 <a href="http://pgaudit.org/">http://pgaudit.org/</a></p>
 ]]></content>
@@ -259,7 +260,7 @@ Now testing from Master:
 </code></pre>
 
 <p>sudo su postgres
-ssh <a href="&#x6d;&#97;&#105;&#108;&#116;&#x6f;&#x3a;&#x62;&#x61;&#x72;&#x6d;&#97;&#x6e;&#64;&#49;&#53;&#x39;&#x2e;&#x32;&#48;&#51;&#x2e;&#49;&#52;&#x33;&#x2e;&#x32;&#49;&#x34;">&#98;&#97;&#x72;&#109;&#x61;&#x6e;&#64;&#49;&#53;&#x39;&#x2e;&#x32;&#48;&#x33;&#46;&#49;&#52;&#51;&#x2e;&#x32;&#x31;&#x34;</a></p>
+ssh <a href="&#109;&#97;&#105;&#x6c;&#x74;&#111;&#58;&#x62;&#x61;&#x72;&#x6d;&#x61;&#x6e;&#64;&#x31;&#x35;&#x39;&#46;&#x32;&#48;&#x33;&#x2e;&#x31;&#x34;&#51;&#x2e;&#x32;&#x31;&#x34;">&#98;&#97;&#x72;&#109;&#97;&#110;&#64;&#49;&#53;&#x39;&#46;&#x32;&#48;&#x33;&#46;&#49;&#52;&#51;&#x2e;&#x32;&#x31;&#52;</a></p>
 
 <pre><code>
 answer yes and if you see something like this:
@@ -326,7 +327,7 @@ backup_options = concurrent_backup
 last_backup_maximum_age = 1 DAY
 [oper]
 description =  &ldquo;Operational PostgreSQL Database Hot Standby&rdquo;
-ssh_command = ssh <a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#x6f;&#58;&#112;&#111;&#115;&#x74;&#x67;&#114;&#101;&#115;&#64;&#49;&#48;&#x2e;&#x30;&#x2e;&#x30;&#x2e;&#49;">&#x70;&#x6f;&#115;&#116;&#103;&#114;&#101;&#x73;&#x40;&#x31;&#48;&#x2e;&#48;&#46;&#x30;&#x2e;&#x31;</a>
+ssh_command = ssh <a href="&#109;&#97;&#x69;&#x6c;&#116;&#111;&#x3a;&#112;&#x6f;&#x73;&#116;&#x67;&#x72;&#101;&#x73;&#x40;&#49;&#48;&#46;&#48;&#x2e;&#x30;&#46;&#49;">&#x70;&#111;&#115;&#x74;&#x67;&#x72;&#x65;&#115;&#x40;&#49;&#x30;&#x2e;&#48;&#46;&#x30;&#46;&#x31;</a>
 conninfo = host=10.0.0.1 user=postgres pasword=strong_password
 minimum_redundancy = 1</p>
 

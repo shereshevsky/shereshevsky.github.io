@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Recovery | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/recovery/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-26T12:41:21+02:00</updated>
+  <updated>2015-11-26T12:41:58+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -113,7 +113,7 @@ Now testing from Master:
 </code></pre>
 
 <p>sudo su postgres
-ssh <a href="&#x6d;&#97;&#x69;&#108;&#116;&#111;&#58;&#98;&#x61;&#114;&#x6d;&#x61;&#x6e;&#64;&#x31;&#x35;&#57;&#x2e;&#x32;&#48;&#x33;&#x2e;&#x31;&#x34;&#x33;&#x2e;&#50;&#x31;&#52;">&#98;&#x61;&#x72;&#109;&#97;&#110;&#64;&#49;&#53;&#57;&#46;&#x32;&#x30;&#x33;&#46;&#x31;&#52;&#51;&#46;&#x32;&#x31;&#52;</a></p>
+ssh <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#x62;&#x61;&#x72;&#109;&#x61;&#110;&#x40;&#x31;&#53;&#57;&#x2e;&#x32;&#x30;&#51;&#46;&#x31;&#52;&#x33;&#46;&#50;&#x31;&#x34;">&#98;&#97;&#114;&#109;&#x61;&#110;&#64;&#x31;&#x35;&#x39;&#x2e;&#50;&#x30;&#51;&#46;&#49;&#x34;&#51;&#x2e;&#50;&#49;&#52;</a></p>
 
 <pre><code>
 answer yes and if you see something like this:
@@ -180,7 +180,7 @@ backup_options = concurrent_backup
 last_backup_maximum_age = 1 DAY
 [oper]
 description =  &ldquo;Operational PostgreSQL Database Hot Standby&rdquo;
-ssh_command = ssh <a href="&#109;&#97;&#105;&#x6c;&#x74;&#x6f;&#58;&#x70;&#111;&#115;&#116;&#x67;&#x72;&#x65;&#x73;&#x40;&#x31;&#48;&#46;&#x30;&#x2e;&#x30;&#46;&#x31;">&#x70;&#111;&#x73;&#x74;&#103;&#114;&#x65;&#115;&#64;&#x31;&#48;&#46;&#x30;&#46;&#x30;&#x2e;&#49;</a>
+ssh_command = ssh <a href="&#x6d;&#97;&#105;&#x6c;&#x74;&#111;&#x3a;&#112;&#x6f;&#x73;&#116;&#x67;&#x72;&#x65;&#115;&#x40;&#x31;&#x30;&#x2e;&#48;&#x2e;&#48;&#46;&#49;">&#x70;&#111;&#115;&#116;&#103;&#114;&#101;&#x73;&#64;&#49;&#x30;&#x2e;&#48;&#46;&#x30;&#46;&#49;</a>
 conninfo = host=10.0.0.1 user=postgres pasword=strong_password
 minimum_redundancy = 1</p>
 
