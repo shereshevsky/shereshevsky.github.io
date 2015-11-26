@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Postgresql | Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/blog/categories/postgresql/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-26T12:29:02+02:00</updated>
+  <updated>2015-11-26T12:41:21+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -78,44 +78,82 @@ sudo pg_ctlcluster 9.5 main restart
 <code>
 sudo tail -f /var/log/postgresql/postgresql-9.5-main.log
 </code>
-postgres=# create table table1(col1 int4);
-CREATE TABLE
-postgres=# insert into table1 values (1);
-INSERT 0 1
-&ndash; 2015-11-26 12:20:48 IST LOG:  AUDIT,2015-11-26 12:20:48.17969+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table1,insert into table1 values (1);
-postgres=# create table table2 as select * from table1;
-SELECT 1
-&ndash; 2015-11-26 12:21:51 IST LOG:  AUDIT,2015-11-26 12:21:51.499926+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table2,create table table2 as select * from table1;
-postgres=# select * from table1, table2;
- col1 | col1
-&mdash;&mdash;+&mdash;&mdash;
-    1 |    1
-(1 row)
-&ndash; 2015-11-26 12:22:45 IST LOG:  AUDIT,2015-11-26 12:22:45.795401+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table1,select * from table1, table2;
-&ndash; 2015-11-26 12:22:45 IST LOG:  AUDIT,2015-11-26 12:22:45.795436+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table2,select * from table1, table2;
-postgres=# create view view1 as select * from table1;
-CREATE VIEW
-postgres=# select * from view1;</p>
+and in serparate window:
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>postgres=# create table table1(col1 int4);
+</span><span class='line'>CREATE TABLE
+</span><span class='line'>postgres=# insert into table1 values (1);
+</span><span class='line'>INSERT 0 1
+</span><span class='line'>&ndash; 2015-11-26 12:20:48 IST LOG:  AUDIT,2015-11-26 12:20:48.17969+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table1,insert into table1 values (1);
+</span><span class='line'>postgres=# create table table2 as select * from table1;
+</span><span class='line'>SELECT 1
+</span><span class='line'>&ndash; 2015-11-26 12:21:51 IST LOG:  AUDIT,2015-11-26 12:21:51.499926+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table2,create table table2 as select * from table1;
+</span><span class='line'>postgres=# select * from table1, table2;
+</span><span class='line'> col1 | col1
+</span><span class='line'>&mdash;&mdash;+&mdash;&mdash;
+</span><span class='line'>    1 |    1
+</span><span class='line'>(1 row)
+</span><span class='line'>&ndash; 2015-11-26 12:22:45 IST LOG:  AUDIT,2015-11-26 12:22:45.795401+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table1,select * from table1, table2;
+</span><span class='line'>&ndash; 2015-11-26 12:22:45 IST LOG:  AUDIT,2015-11-26 12:22:45.795436+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table2,select * from table1, table2;
+</span><span class='line'>postgres=# create view view1 as select * from table1;
+</span><span class='line'>CREATE VIEW
+</span><span class='line'>postgres=# select * from view1;&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h2&gt; col1 &lt;/h2&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;pre&gt;&lt;code&gt;1
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;(1 row)
+</span><span class='line'>&ndash; 2015-11-26 12:24:54 IST LOG:  AUDIT,2015-11-26 12:24:54.091324+02,postgres,postgres,postgres,READ,SELECT,VIEW,public.view1,select * from view1;
+</span><span class='line'>&ndash; 2015-11-26 12:24:54 IST LOG:  AUDIT,2015-11-26 12:24:54.091362+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table1,select * from view1;
+</span><span class='line'>postgres=# create function function1 (int4) returns void as $$ insert into table1 (col1) values ($1) $$ language sql;
+</span><span class='line'>CREATE FUNCTION
+</span><span class='line'>postgres=# select function1(8);&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h2&gt; function1 &lt;/h2&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;(1 row)
+</span><span class='line'>&ndash; 2015-11-26 12:27:34 IST LOG:  AUDIT,2015-11-26 12:27:34.451274+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table1,select function1(8);
+</span><span class='line'>&ndash; 2015-11-26 12:27:34 IST CONTEXT:  SQL function &ldquo;function1&rdquo; statement 1</span></code></pre></td></tr></table></div></figure></p>
 
-<h2> col1 </h2>
-
-<pre><code>1
-</code></pre>
-
-<p>(1 row)
-&ndash; 2015-11-26 12:24:54 IST LOG:  AUDIT,2015-11-26 12:24:54.091324+02,postgres,postgres,postgres,READ,SELECT,VIEW,public.view1,select * from view1;
-&ndash; 2015-11-26 12:24:54 IST LOG:  AUDIT,2015-11-26 12:24:54.091362+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table1,select * from view1;
-postgres=# create function function1 (int4) returns void as $$ insert into table1 (col1) values ($1) $$ language sql;
-CREATE FUNCTION
-postgres=# select function1(8);</p>
-
-<h2> function1 </h2>
-
-<p>(1 row)
-&ndash; 2015-11-26 12:27:34 IST LOG:  AUDIT,2015-11-26 12:27:34.451274+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table1,select function1(8);
-&ndash; 2015-11-26 12:27:34 IST CONTEXT:  SQL function &ldquo;function1&rdquo; statement 1</p>
-
-<p><a href="https://github.com/pgaudit/pgaudit/blob/master/README.md">https://github.com/pgaudit/pgaudit/blob/master/README.md</a>
+<p>Some links:
+<a href="https://github.com/pgaudit/pgaudit/blob/master/README.md">https://github.com/pgaudit/pgaudit/blob/master/README.md</a>
 <a href="http://www.postgresql.org/message-id/5363390F.8040704@2ndquadrant.com">http://www.postgresql.org/message-id/5363390F.8040704@2ndquadrant.com</a>
 <a href="http://pgaudit.org/">http://pgaudit.org/</a></p>
 ]]></content>
@@ -221,7 +259,7 @@ Now testing from Master:
 </code></pre>
 
 <p>sudo su postgres
-ssh <a href="&#x6d;&#97;&#105;&#x6c;&#116;&#x6f;&#x3a;&#x62;&#x61;&#x72;&#109;&#97;&#x6e;&#64;&#x31;&#x35;&#x39;&#x2e;&#50;&#48;&#x33;&#x2e;&#49;&#52;&#x33;&#46;&#x32;&#x31;&#52;">&#98;&#x61;&#114;&#109;&#x61;&#x6e;&#64;&#49;&#53;&#57;&#x2e;&#50;&#48;&#x33;&#x2e;&#49;&#x34;&#51;&#x2e;&#50;&#49;&#52;</a></p>
+ssh <a href="&#x6d;&#97;&#105;&#108;&#116;&#x6f;&#x3a;&#x62;&#x61;&#x72;&#x6d;&#97;&#x6e;&#64;&#49;&#53;&#x39;&#x2e;&#x32;&#48;&#51;&#x2e;&#49;&#52;&#x33;&#x2e;&#x32;&#49;&#x34;">&#98;&#97;&#x72;&#109;&#x61;&#x6e;&#64;&#49;&#53;&#x39;&#x2e;&#x32;&#48;&#x33;&#46;&#49;&#52;&#51;&#x2e;&#x32;&#x31;&#x34;</a></p>
 
 <pre><code>
 answer yes and if you see something like this:
@@ -288,7 +326,7 @@ backup_options = concurrent_backup
 last_backup_maximum_age = 1 DAY
 [oper]
 description =  &ldquo;Operational PostgreSQL Database Hot Standby&rdquo;
-ssh_command = ssh <a href="&#109;&#97;&#105;&#108;&#x74;&#x6f;&#58;&#112;&#x6f;&#115;&#x74;&#x67;&#114;&#101;&#x73;&#x40;&#x31;&#x30;&#x2e;&#48;&#x2e;&#x30;&#46;&#49;">&#x70;&#x6f;&#115;&#x74;&#x67;&#x72;&#x65;&#x73;&#x40;&#x31;&#48;&#46;&#48;&#46;&#48;&#46;&#49;</a>
+ssh_command = ssh <a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#x6f;&#58;&#112;&#111;&#115;&#x74;&#x67;&#114;&#101;&#115;&#64;&#49;&#48;&#x2e;&#x30;&#x2e;&#x30;&#x2e;&#49;">&#x70;&#x6f;&#115;&#116;&#103;&#114;&#101;&#x73;&#x40;&#x31;&#48;&#x2e;&#48;&#46;&#x30;&#x2e;&#x31;</a>
 conninfo = host=10.0.0.1 user=postgres pasword=strong_password
 minimum_redundancy = 1</p>
 

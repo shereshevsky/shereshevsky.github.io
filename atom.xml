@@ -4,7 +4,7 @@
   <title><![CDATA[Data Tips and Tricks]]></title>
   <link href="http://dbcaptain.com/atom.xml" rel="self"/>
   <link href="http://dbcaptain.com/"/>
-  <updated>2015-11-26T12:29:02+02:00</updated>
+  <updated>2015-11-26T12:41:21+02:00</updated>
   <id>http://dbcaptain.com/</id>
   <author>
     <name><![CDATA[Alexander Shereshevsky]]></name>
@@ -87,44 +87,78 @@ with <code>shared_preload_libraries = 'pgaudit'</code></p>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo tail -f /var/log/postgresql/postgresql-9.5-main.log</span></code></pre></td></tr></table></div></figure>
 
 
-<p>postgres=# create table table1(col1 int4);
-CREATE TABLE
-postgres=# insert into table1 values (1);
-INSERT 0 1
-&ndash; 2015-11-26 12:20:48 IST LOG:  AUDIT,2015-11-26 12:20:48.17969+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table1,insert into table1 values (1);
-postgres=# create table table2 as select * from table1;
-SELECT 1
-&ndash; 2015-11-26 12:21:51 IST LOG:  AUDIT,2015-11-26 12:21:51.499926+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table2,create table table2 as select * from table1;
-postgres=# select * from table1, table2;
- col1 | col1
-&mdash;&mdash;+&mdash;&mdash;
-    1 |    1
-(1 row)
-&ndash; 2015-11-26 12:22:45 IST LOG:  AUDIT,2015-11-26 12:22:45.795401+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table1,select * from table1, table2;
-&ndash; 2015-11-26 12:22:45 IST LOG:  AUDIT,2015-11-26 12:22:45.795436+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table2,select * from table1, table2;
-postgres=# create view view1 as select * from table1;
-CREATE VIEW
-postgres=# select * from view1;</p>
+<p>and in serparate window:</p>
 
-<h2> col1 </h2>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>postgres=# create table table1(col1 int4);
+</span><span class='line'>CREATE TABLE
+</span><span class='line'>postgres=# insert into table1 values (1);
+</span><span class='line'>INSERT 0 1
+</span><span class='line'>-- 2015-11-26 12:20:48 IST LOG:  AUDIT,2015-11-26 12:20:48.17969+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table1,insert into table1 values (1);
+</span><span class='line'>postgres=# create table table2 as select * from table1;
+</span><span class='line'>SELECT 1
+</span><span class='line'>-- 2015-11-26 12:21:51 IST LOG:  AUDIT,2015-11-26 12:21:51.499926+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table2,create table table2 as select * from table1;
+</span><span class='line'>postgres=# select * from table1, table2;
+</span><span class='line'> col1 | col1 
+</span><span class='line'>------+------
+</span><span class='line'>    1 |    1
+</span><span class='line'>(1 row)
+</span><span class='line'>-- 2015-11-26 12:22:45 IST LOG:  AUDIT,2015-11-26 12:22:45.795401+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table1,select * from table1, table2;
+</span><span class='line'>-- 2015-11-26 12:22:45 IST LOG:  AUDIT,2015-11-26 12:22:45.795436+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table2,select * from table1, table2;
+</span><span class='line'>postgres=# create view view1 as select * from table1;
+</span><span class='line'>CREATE VIEW
+</span><span class='line'>postgres=# select * from view1;
+</span><span class='line'> col1 
+</span><span class='line'>------
+</span><span class='line'>    1
+</span><span class='line'>(1 row)
+</span><span class='line'>-- 2015-11-26 12:24:54 IST LOG:  AUDIT,2015-11-26 12:24:54.091324+02,postgres,postgres,postgres,READ,SELECT,VIEW,public.view1,select * from view1;
+</span><span class='line'>-- 2015-11-26 12:24:54 IST LOG:  AUDIT,2015-11-26 12:24:54.091362+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table1,select * from view1;
+</span><span class='line'>postgres=# create function function1 (int4) returns void as $$ insert into table1 (col1) values ($1) $$ language sql;
+</span><span class='line'>CREATE FUNCTION
+</span><span class='line'>postgres=# select function1(8);
+</span><span class='line'> function1 
+</span><span class='line'>-----------
+</span><span class='line'> 
+</span><span class='line'>(1 row)
+</span><span class='line'>-- 2015-11-26 12:27:34 IST LOG:  AUDIT,2015-11-26 12:27:34.451274+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table1,select function1(8);
+</span><span class='line'>-- 2015-11-26 12:27:34 IST CONTEXT:  SQL function "function1" statement 1</span></code></pre></td></tr></table></div></figure>
 
-<pre><code>1
-</code></pre>
 
-<p>(1 row)
-&ndash; 2015-11-26 12:24:54 IST LOG:  AUDIT,2015-11-26 12:24:54.091324+02,postgres,postgres,postgres,READ,SELECT,VIEW,public.view1,select * from view1;
-&ndash; 2015-11-26 12:24:54 IST LOG:  AUDIT,2015-11-26 12:24:54.091362+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table1,select * from view1;
-postgres=# create function function1 (int4) returns void as $$ insert into table1 (col1) values ($1) $$ language sql;
-CREATE FUNCTION
-postgres=# select function1(8);</p>
-
-<h2> function1 </h2>
-
-<p>(1 row)
-&ndash; 2015-11-26 12:27:34 IST LOG:  AUDIT,2015-11-26 12:27:34.451274+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table1,select function1(8);
-&ndash; 2015-11-26 12:27:34 IST CONTEXT:  SQL function &ldquo;function1&rdquo; statement 1</p>
-
-<p><a href="https://github.com/pgaudit/pgaudit/blob/master/README.md">https://github.com/pgaudit/pgaudit/blob/master/README.md</a>
+<p>Some links:
+<a href="https://github.com/pgaudit/pgaudit/blob/master/README.md">https://github.com/pgaudit/pgaudit/blob/master/README.md</a>
 <a href="http://www.postgresql.org/message-id/5363390F.8040704@2ndquadrant.com">http://www.postgresql.org/message-id/5363390F.8040704@2ndquadrant.com</a>
 <a href="http://pgaudit.org/">http://pgaudit.org/</a></p>
 ]]></content>
