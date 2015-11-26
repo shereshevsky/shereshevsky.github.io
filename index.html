@@ -9,16 +9,7 @@
   <meta name="author" content="Alexander Shereshevsky">
 
   
-  <meta name="description" content="BaRman - Setup fail tolerant PostgreSQL with BaRman. Desired Setup 1
-2
-3
-4
-5
-6
-7
--------------- --------------
-| | | |
-| PostgreSQL | Streaming &hellip;">
+  <meta name="description" content="The new PostgreSQL version (9.5) with updated event trigger code support interesting plugin developed by 2ndQuadrant - pgaudit [https://github.com/ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -74,6 +65,143 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/11/24/Postgres%209.5%20audit%20tables%20access/">Postgres 9.5 Audit Tables Access</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-11-24T16:55:00+02:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>4:55 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>The new PostgreSQL version (9.5) with updated event trigger code support interesting plugin developed by 2ndQuadrant - pgaudit [<a href="https://github.com/2ndQuadrant/pgaudit">https://github.com/2ndQuadrant/pgaudit</a>].
+Can be used to audit all data access by users on table level (despite table was accessed using view or function).</p>
+
+<h2>Use cases</h2>
+
+<ul>
+<li>Report showing only specific users actually access tables data (sometimes requered by regulaters).
+For example, you can be asked to provide evidence only specific users can access applicative managment tables.
+Since DB grants provides only snapshot of current state, full access log should be provided (preferably located on separate storage).</li>
+<li>Discover real table usage - you want to reduce table permissions for users not really currently accesing the table.</li>
+</ul>
+
+
+<p>1) Add 9.5 repository to apt sources
+edit <code>/etc/apt/sources.list.d/pgdg.list</code>
+with <code>deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main 9.5</code></p>
+
+<p>2) Install PostgreSQL 9.5</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install postgresql-9.5</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3) Clone and install extension</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone git@github.com:2ndQuadrant/pgaudit.git
+</span><span class='line'>cd pgaudit
+</span><span class='line'>sudo make USE_PGXS=1 install </span></code></pre></td></tr></table></div></figure>
+
+
+<p>4) Edit config file to include library and restart PostgreSQL
+edit <code>/etc/postgresql/9.5/main/postgresql.conf</code>
+with <code>shared_preload_libraries = 'pgaudit'</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo pg_ctlcluster 9.5 main restart </span></code></pre></td></tr></table></div></figure>
+
+
+<p>5) Connect to server, create extension</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo su postgres
+</span><span class='line'>$ psql -p5434
+</span><span class='line'>psql (9.5beta2)
+</span><span class='line'>Type "help" for help.
+</span><span class='line'>
+</span><span class='line'>postgres=# create extension pgaudit;
+</span><span class='line'>CREATE EXTENSION
+</span><span class='line'>postgres=# ALTER DATABASE postgres SET pgaudit.log = 'read, write, user';
+</span><span class='line'>ALTER DATABASE</span></code></pre></td></tr></table></div></figure>
+
+
+<p>6) Check it</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo tail -f /var/log/postgresql/postgresql-9.5-main.log</span></code></pre></td></tr></table></div></figure>
+
+
+<p>postgres=# create table table1(col1 int4);
+CREATE TABLE
+postgres=# insert into table1 values (1);
+INSERT 0 1
+&ndash; 2015-11-26 12:20:48 IST LOG:  AUDIT,2015-11-26 12:20:48.17969+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table1,insert into table1 values (1);
+postgres=# create table table2 as select * from table1;
+SELECT 1
+&ndash; 2015-11-26 12:21:51 IST LOG:  AUDIT,2015-11-26 12:21:51.499926+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table2,create table table2 as select * from table1;
+postgres=# select * from table1, table2;
+ col1 | col1
+&mdash;&mdash;+&mdash;&mdash;
+    1 |    1
+(1 row)
+&ndash; 2015-11-26 12:22:45 IST LOG:  AUDIT,2015-11-26 12:22:45.795401+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table1,select * from table1, table2;
+&ndash; 2015-11-26 12:22:45 IST LOG:  AUDIT,2015-11-26 12:22:45.795436+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table2,select * from table1, table2;
+postgres=# create view view1 as select * from table1;
+CREATE VIEW
+postgres=# select * from view1;</p>
+
+<h2> col1 </h2>
+
+<pre><code>1
+</code></pre>
+
+<p>(1 row)
+&ndash; 2015-11-26 12:24:54 IST LOG:  AUDIT,2015-11-26 12:24:54.091324+02,postgres,postgres,postgres,READ,SELECT,VIEW,public.view1,select * from view1;
+&ndash; 2015-11-26 12:24:54 IST LOG:  AUDIT,2015-11-26 12:24:54.091362+02,postgres,postgres,postgres,READ,SELECT,TABLE,public.table1,select * from view1;
+postgres=# create function function1 (int4) returns void as $$ insert into table1 (col1) values ($1) $$ language sql;
+CREATE FUNCTION
+postgres=# select function1(8);</p>
+
+<h2> function1 </h2>
+
+<p>(1 row)
+&ndash; 2015-11-26 12:27:34 IST LOG:  AUDIT,2015-11-26 12:27:34.451274+02,postgres,postgres,postgres,WRITE,INSERT,TABLE,public.table1,select function1(8);
+&ndash; 2015-11-26 12:27:34 IST CONTEXT:  SQL function &ldquo;function1&rdquo; statement 1</p>
+
+<p><a href="https://github.com/pgaudit/pgaudit/blob/master/README.md">https://github.com/pgaudit/pgaudit/blob/master/README.md</a>
+<a href="http://www.postgresql.org/message-id/5363390F.8040704@2ndquadrant.com">http://www.postgresql.org/message-id/5363390F.8040704@2ndquadrant.com</a>
+<a href="http://pgaudit.org/">http://pgaudit.org/</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -904,6 +1032,10 @@ Here you can find different mirrors.</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/11/24/Postgres%209.5%20audit%20tables%20access/">Postgres 9.5 Audit Tables Access</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/11/01/Install%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/">Install BaRman on PostgreSQL 9.4 Slave Server</a>

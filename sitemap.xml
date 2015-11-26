@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://dbcaptain.com/blog/2015/11/24/Postgres%209.5%20audit%20tables%20access/</loc>
+    <lastmod>2015-11-24T16:55:00+02:00</lastmod>
+  </url>
+  <url>
     <loc>http://dbcaptain.com/blog/2015/11/01/Install%20BaRman%20on%20PostgreSQL%209.4%20Slave%20server/</loc>
     <lastmod>2015-11-01T12:43:15+02:00</lastmod>
   </url>
@@ -50,5 +54,20 @@
   </url>
   <url>
     <loc>http://dbcaptain.com/blog/categories/recovery/</loc>
+  </url>
+  <url>
+    <loc>http://dbcaptain.com/blog/categories/audit/</loc>
+  </url>
+  <url>
+    <loc>http://dbcaptain.com/blog/categories/permissions/</loc>
+  </url>
+  <url>
+    <loc>http://dbcaptain.com/blog/categories/grants/</loc>
+  </url>
+  <url>
+    <loc>http://dbcaptain.com/blog/categories/access/</loc>
+  </url>
+  <url>
+    <loc>http://dbcaptain.com/blog/categories/logs/</loc>
   </url>
 </urlset>
